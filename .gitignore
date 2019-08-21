@@ -1,0 +1,9 @@
+.*.swp
+.*sw?
+*~
+TAGS
+GPATH
+GRTAGS
+GTAGS
+*.deb*
+qemu-aarch64-static

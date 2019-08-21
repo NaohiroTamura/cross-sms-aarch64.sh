@@ -1,0 +1,118 @@
+[root@x86_64 ~]# docker version | grep Package
+ Package version: docker-1.13.1-102.git7f2769b.el7.centos.x86_64
+ Package version: docker-1.13.1-102.git7f2769b.el7.centos.x86_64
+
+[root@x86_64 ~]# rpm -qa | grep ohpc-base
+ohpc-base-1.3.8-3.1.ohpc.1.3.8.x86_64
+
+
+[root@x86_64 ~]# git clone https://github.com/NaohiroTamura/cross-sms-aarch64.sh
+[root@x86_64 ~]# cd cross-sms-aarch64.sh
+
+
+[root@x86_64 cross-sms-aarch64.sh]# wget http://security.ubuntu.com/ubuntu/pool/universe/q/qemu/qemu-user-static_3.1+dfsg-2ubuntu3.1_amd64.deb
+[root@x86_64 cross-sms-aarch64.sh]# ar p qemu-user-static_3.1+dfsg-2ubuntu3.1_amd64.deb data.tar.xz | tar Jxvf - ./usr/bin/qemu-aarch64-static
+
+[root@x86_64 cross-sms-aarch64.sh]# cp -p etc/binfmt.d/aarch64.conf /etc/binfmt.d
+
+[root@x86_64 cross-sms-aarch64.sh]# systemctl restart systemd-binfmt
+
+[root@x86_64 cross-sms-aarch64.sh]# systemctl status systemd-binfmt
+
+[root@x86_64 cross-sms-aarch64.sh]# ll /proc/sys/fs/binfmt_misc/aarch64
+
+[root@x86_64 cross-sms-aarch64.sh]# make
+
+# Export /opt/ohpc-aarch64/opt/ohpc from master server to docker container
+[root@x86_64 cross-sms-aarch64.sh]# echo "/opt/ohpc-aarch64/opt/ohpc 172.17.0.0/16(rw,no_subtree_check,no_root_squash)" >> /etc/exports
+[root@x86_64 cross-sms-aarch64.sh]# exportfs -ra
+
+
+[root@x86_64 cross-sms-aarch64.sh]# docker volume create --driver local \
+--opt type=nfs \
+--opt o=addr=${sms_ip},rw,nfsvers=3 \
+--opt device=:/opt/ohpc-aarch64/opt/ohpc ohpc-aarch64
+
+[root@x86_64 cross-sms-aarch64.sh]# docker volume create yum-aarch64
+
+[root@x86_64 cross-sms-aarch64.sh]# docker volume ls
+DRIVER              VOLUME NAME
+local               ohpc-aarch64
+local               yum-aarch64
+
+# --------------------------------------------------
+# Deﬁne compute image for provisioning (Section 3.6)
+# --------------------------------------------------
+[root@x86_64 cross-sms-aarch64.sh]$ ./sms-aarch64.sh
+[root@aarch64 /]# export CHROOT=/opt/ohpc/admin/images/centos7.6
+[root@aarch64 /]# mkdir -p $CHROOT/usr/bin
+[root@aarch64 /]# cp -p /usr/bin/qemu-aarch64-static $CHROOT/usr/bin
+[root@aarch64 /]# wwmkchroot centos-7 $CHROOT
+[root@aarch64 /]# yum -y --installroot=$CHROOT install ohpc-base-compute
+[root@aarch64 /]# cp -p /etc/resolv.conf $CHROOT/etc/resolv.conf
+[root@aarch64 /]# yum -y --installroot=$CHROOT install ohpc-slurm-client
+[root@aarch64 /]# yum -y --installroot=$CHROOT install ntp
+[root@aarch64 /]# yum -y --installroot=$CHROOT install kernel
+[root@aarch64 /]# yum -y --installroot=$CHROOT install lmod-ohpc
+[root@aarch64 /]# exit
+[root@x86_64 cross-sms-aarch64.sh] cd ..
+
+[root@x86_64 ~]# export AARCH64_CHROOT=/opt/ohpc-aarch64/opt/ohpc/admin/images/centos7.6
+
+# Add NFS client mounts of /home and /opt/ohpc/pub to base image
+[root@x86_64 ~]# echo "${sms_ip}:/home /home nfs nfsvers=3,nodev,nosuid 0 0" >> $AARCH64_CHROOT/etc/fstab
+[root@x86_64 ~]# echo "${sms_ip}:/opt/ohpc-aarch64/opt/ohpc/pub /opt/ohpc/pub nfs nfsvers=3,nodev 0 0" >> $AARCH64_CHROOT/etc/fstab
+
+# Export /home and OpenHPC public packages from master server
+[root@x86_64 ~]# echo "/opt/ohpc-aarch64/opt/ohpc/pub *(ro,no_subtree_check,fsid=12)" >> /etc/exports
+[root@x86_64 ~]# exportfs -ra
+
+
+# Enable NTP time service on computes and identify master host as local NTP server
+[root@x86_64 ~]# chroot $AARCH64_CHROOT systemctl enable ntpd
+[root@x86_64 ~]# echo "server ${sms_ip}" >> $AARCH64_CHROOT/etc/ntp.conf
+
+
+# ---------------------------------------
+# Install Development Tools (Section 4.1)
+# ---------------------------------------
+ yum -y install ohpc-autotools
+ yum -y install EasyBuild-ohpc
+ yum -y install hwloc-ohpc
+ yum -y install spack-ohpc
+ yum -y install valgrind-ohpc
+
+# -------------------------------
+# Install Compilers (Section 4.2)
+# -------------------------------
+ yum -y install gnu8-compilers-ohpc
+
+# ----------------------
+# Install llvm Compilers
+# ----------------------
+ yum -y install llvm5-compilers-ohpc
+
+# --------------------------------
+# Install MPI Stacks (Section 4.3)
+# --------------------------------
+ yum -y install openmpi3-gnu8-ohpc mpich-gnu8-ohpc
+
+# ---------------------------------------
+# Install Performance Tools (Section 4.4)
+# ---------------------------------------
+ yum -y install ohpc-gnu8-perf-tools
+ yum -y install lmod-defaults-gnu8-openmpi3-ohpc
+
+# ---------------------------------------------------
+# Install 3rd Party Libraries and Tools (Section 4.6)
+# ---------------------------------------------------
+ yum -y install ohpc-gnu8-serial-libs
+ yum -y install ohpc-gnu8-io-libs
+ yum -y install ohpc-gnu8-python-libs
+ yum -y install ohpc-gnu8-runtimes
+
+# ---------------------------------------------------
+# Install 3rd Party Libraries and Tools (Section 4.6)
+# ---------------------------------------------------
+ yum -y install ohpc-gnu8-mpich-parallel-libs
+ yum -y install ohpc-gnu8-openmpi3-parallel-libs

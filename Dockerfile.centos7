@@ -1,0 +1,39 @@
+# Copyright 2019 FUJITSU LIMITED
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+
+FROM arm64v8/centos:7
+
+ADD usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
+
+# work around for yum update locale issue
+# see https://serverfault.com/questions/616790/how-to-add-language-support-on-centos-7-on-docker
+RUN sed -i 's/^override_install_langs/# &/' ./etc/yum.conf && \
+    yum -y update
+
+
+# ------------------------------------------------------------
+# Enable OpenHPC repository for local use (Section 3.1)
+# ------------------------------------------------------------
+RUN yum -y install http://build.openhpc.community/OpenHPC:/1.3/CentOS_7/aarch64/ohpc-release-1.3-1.el7.aarch64.rpm && \
+
+# ------------------------------------------------------------
+# Add baseline OpenHPC and provisioning services (Section 3.3)
+# ------------------------------------------------------------
+    yum -y --setopt=tsflags=nodocs install openssh which file ohpc-base ohpc-warewulf
+
+
+VOLUME ["/opt/ohpc", "/var/lib/yum"]
+
+CMD ["/bin/bash"]
