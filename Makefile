@@ -17,11 +17,66 @@ SHELL:=/bin/bash
 # set default value
 export docker_image_tag ?= latest
 base_os ?= centos7
+install_path ?= /usr/local/bin
 
 all: build
 
+
+install:
+	@echo "setting up prerequisites"
+	if [ -v $(sms_ip) ]; \
+	then \
+		echo "please set shell variable 'sms_ip'. ex. make install sms_ip=XX.XX.XX.XX" && \
+		exit 1 ; \
+	fi
+	if [ ! -e /etc/binfmt.d/aarch64.conf ]; \
+	then \
+		cp -p etc/binfmt.d/aarch64.conf /etc/binfmt.d && \
+		systemctl restart systemd-binfmt ; \
+	fi
+	if [ ! -e /proc/sys/fs/binfmt_misc/aarch64 ]; \
+	then \
+		echo "failed binfmt_misc setup" ; \
+	fi
+	if [ ! -d /opt/ohpc-aarch64/opt/ohpc ]; \
+	then \
+		mkdir -p /opt/ohpc-aarch64/opt/ohpc ; \
+	fi
+	if ! grep -qe "^/opt/ohpc-aarch64/opt/ohpc\s*172.17.0.0/16" /etc/exports ; \
+	then \
+		echo "/opt/ohpc-aarch64/opt/ohpc 172.17.0.0/16(rw,no_subtree_check,no_root_squash) $(sms_ip)/32(rw,no_subtree_check,no_root_squash)" >> /etc/exports && \
+		exportfs -ra; \
+	fi
+	if docker volume ls | grep -qe "^local\s*ohpc-aarch64$$" ; \
+	then \
+		echo "Docker NFS Volume 'ohpc-aarch64' already exits. Please remove the contents so that the container can initialize the volume at the first invocation, otherwise it causes inconsistency" ; \
+	else \
+		docker volume create --driver local \
+			--opt type=nfs \
+			--opt o=addr=$(sms_ip),rw,nfsvers=3 \
+			--opt device=:/opt/ohpc-aarch64/opt/ohpc ohpc-aarch64 ; \
+	fi
+	if docker volume ls | grep -qe "^local\s*yum-aarch64$$" ; \
+	then \
+		echo "Docker Local Volume 'yum-aarch64' already exits. Please remove the contents so that the container can initialize the volume at the first invocation, otherwise it causes inconsistency" ; \
+	else \
+		docker volume create yum-aarch64 ; \
+	fi
+	install -o root -g root  sms-aarch64.sh $(install_path)
+
+
 build:
 	@echo "building docker container"
+	if [ ! -e usr/bin/qemu-aarch64-static ]; \
+	then \
+		wget http://security.ubuntu.com/ubuntu/pool/universe/q/qemu/qemu-user-static_3.1+dfsg-2ubuntu3.1_amd64.deb && \
+		( ar p qemu-user-static_3.1+dfsg-2ubuntu3.1_amd64.deb data.tar.xz | tar Jxvf - ./usr/bin/qemu-aarch64-static ) ; \
+	fi
+	if [ ! -e usr/bin/qemu-aarch64-static ]; \
+	then \
+		echo "failed to download qemu-aarch64-static" && \
+		exit 1 ; \
+	fi
 	if [ -v $(HTTP_PROXY) -a -v $(HTTPS_PROXY) ]; \
 	then \
 		docker build -f Dockerfile.$(base_os) \
@@ -34,3 +89,6 @@ build:
 			--build-arg HTTPS_PROXY=$(HTTPS_PROXY) \
 			--build-arg https_proxy=$(HTTPS_PROXY) ; \
 	fi
+
+clean:
+	rm -rf usr *.deb*
