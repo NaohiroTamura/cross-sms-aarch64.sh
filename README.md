@@ -1,21 +1,25 @@
 # Cross SMS aarch64 Shell
 
-This software is [OpenHPC][1] utility which enables to create aarch64
-initial build image (BOS) on System Management Server (SMS) x86_64,
-and facilitates to deploy and manage Compute Nodes both x86_64 and
+This software is [OpenHPC][1] utility which enables without physical
+aarch64 machine to create aarch64 initial build image, Base Operating
+System (BOS), and to install aarch64 OpenHPC Development Components on
+System anagement Server (SMS) x86_64.
+As the result, it achieves effective machine resources usage, and
+facilitates to deploy and manage Compute Nodes both x86_64 and
 aarch64.
 
-Typically SMS x86_64 exports x86_64 application as /opt/ohpc/pub, and
-CN x86_64 mounts it on /opt/ohpc/pub.
+Typically SMS x86_64 exports x86_64 OpenHPC Development Components as
+/opt/ohpc/pub, and CN x86_64 mounts it on /opt/ohpc/pub.
 
-And SMS aarch64 exports aarch64 application as /opt/ohpc/pub, and
-CN aarch64 mounts it on /opt/ohpc/pub as well.
+And SMS aarch64 exports aarch64 OpenHPC Development Components as
+/opt/ohpc/pub, and CN aarch64 mounts it on /opt/ohpc/pub as well.
 
 
 In case of crossing the architecture which means that SMS x86_64
 serves not only CN x86_64 but also CN aarch64, this software helps to
-install aarch64 application into /opt/ohpc-aarch64/opt/ohpc/pub and
-sets up BOS so that CN aarch64 can mounts it on /opt/ohpc/pub.
+install aarch64 OpenHPC Development Components into
+/opt/ohpc-aarch64/opt/ohpc/pub so that CN aarch64 can mounts it on
+/opt/ohpc/pub.
 
 [1]: https://github.com/openhpc/ohpc "OpenHPC"
 
@@ -64,8 +68,8 @@ HTTPS_PROXY environment variables.
 
 What *make* does is to  build docker container named *sms-aarch64.sh*.
 
-*qemu-aarch64-static* binary is derived from Ubuntu package, since
-it's static binary it can run on any Linux.
+*qemu-aarch64-static* binary is retrieved from Ubuntu package, since
+it's static binary which can run on any Linux.
 
 If you prefer to compile *qemu-aarch64-static* from QEMU source code,
 put your compiled *qemu-aarch64-static* under *usr/bin* directory so
@@ -100,7 +104,7 @@ What *make install* does is the following four steps:
 
 # 2. export /opt/ohpc-aarch64/opt/ohpc from master server to docker container
 [root@x86_64 cross-sms-aarch64.sh]# mkdir -p /opt/ohpc-aarch64/opt/ohpc
-[root@x86_64 cross-sms-aarch64.sh]# echo "/opt/ohpc-aarch64/opt/ohpc 172.17.0.0/16(rw,no_subtree_check,no_root_squash)" >> /etc/exports
+[root@x86_64 cross-sms-aarch64.sh]# echo "/opt/ohpc-aarch64/opt/ohpc 172.17.0.0/16(rw,no_subtree_check,no_root_squash) ${sms_ip}/32(rw,no_subtree_check,no_root_squash)" >> /etc/exports
 [root@x86_64 cross-sms-aarch64.sh]# exportfs -ra
 
 # 3. create Docker NFS volume and local volume
@@ -122,8 +126,9 @@ local               yum-aarch64
 
 *sms-aarch64.sh* is mainly used for two purposes:
 
-1. create aarch64 BOS image onto SMS x86_64 file system
-2. install aarch64 OHPC application into SMS x86_64 file system
+1. build aarch64 initial BOS image onto SMS x86_64 file system
+2. install aarch64 OpenHPC Development Components into SMS x86_64 file
+   system
 
 Heading title hereinafter refers to the section of OpenHPC 1.3.8
 (11 June 2019) [CentOS 7.6 aarch64 Install guide with Warewulf +
@@ -163,9 +168,13 @@ don't have to set it up in the container.
 
 ### 3.6 Deﬁne compute image for provisioning
 
-In order to create aarch64 BOS Image, you need to interact with
+In order to build aarch64 initial BOS Image, you need to interact with
 *sms-aarch64.sh* container. Please notice that the difference of the
 prompts between *[root@x86_64 ~]$* and *[root@aarch64 /]#*
+
+Please notice the step **"cp -p /usr/bin/qemu-aarch64-static
+$CHROOT/usr/bin"** before invoking *wwmkchroot*". This step is
+essential to build the aarch64 initial BOS Image on SMS x86_64.
 
 ```sh
 [root@x86_64 ~]$ sms-aarch64.sh
@@ -182,7 +191,7 @@ prompts between *[root@x86_64 ~]$* and *[root@aarch64 /]#*
 [root@aarch64 /]# exit
 ```
 
-The warewulf database running on SMS x86_64, so you don't have to
+The warewulf database is running on SMS x86_64, so you don't have to
 anything to the container.
 
 Please notice that the path */opt/ohpc/admin/images/centos7.6* in the
@@ -217,12 +226,13 @@ container.
 In order to create aarch64 bootstrap, please make sure to install
 *warewulf-provision-initramfs-aarch64-ohpc* package into SMS x86_64.
 
-The kernel version of the aarch64 OBS image is different from the
-kernel version of SMS x86_64. So please check the version as follows.
+The kernel version of the aarch64 initial OBS image is different from
+the kernel version of SMS x86_64. So please check the version as
+follows.
 
 The bootstrap image and Virtual Node File System (VNFS) image created
-on x86_64 has ARCH attribute *x86_64* respectively. So please update
-the ARCH as follows.
+on x86_64 has *ARCH* attribute *x86_64* respectively. So please update
+the ARCH attribute as follows.
 
 ```sh
 [root@x86_64 ~]# yum install -y warewulf-provision-initramfs-aarch64-ohpc
@@ -288,6 +298,9 @@ centos7.6-aarch64    277.7      aarch64    /opt/ohpc-aarch64/opt/ohpc/admin/imag
 Boot the CN aarch64 via IPMI as CN x86_64.
 
 ### 4.1 Development Tools
+
+*sms-aarch64.sh* can be used not only interactive shell but also batch
+shell as follows.
 
 ```sh
 [root@x86_64 ~]$ sms-aarch64.sh yum -y install ohpc-autotools
