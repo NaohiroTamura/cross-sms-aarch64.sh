@@ -170,14 +170,14 @@ don't have to set it up in the container.
 
 In order to build aarch64 initial BOS Image, you need to interact with
 *sms-aarch64.sh* container. Please notice that the difference of the
-prompts between *[root@x86_64 ~]$* and *[root@aarch64 /]#*
+prompts between *[root@x86_64 ~]#* and *[root@aarch64 /]#*
 
 Please notice the step **"cp -p /usr/bin/qemu-aarch64-static
 $CHROOT/usr/bin"** before invoking *wwmkchroot*". This step is
 essential to build the aarch64 initial BOS Image on SMS x86_64.
 
 ```sh
-[root@x86_64 ~]$ sms-aarch64.sh
+[root@x86_64 ~]# sms-aarch64.sh
 [root@aarch64 /]# export CHROOT=/opt/ohpc/admin/images/centos7.6
 [root@aarch64 /]# mkdir -p $CHROOT/usr/bin
 [root@aarch64 /]# cp -p /usr/bin/qemu-aarch64-static $CHROOT/usr/bin
@@ -303,46 +303,46 @@ Boot the CN aarch64 via IPMI as CN x86_64.
 shell as follows.
 
 ```sh
-[root@x86_64 ~]$ sms-aarch64.sh yum -y install ohpc-autotools
-[root@x86_64 ~]$ sms-aarch64.sh yum -y install EasyBuild-ohpc
-[root@x86_64 ~]$ sms-aarch64.sh yum -y install hwloc-ohpc
-[root@x86_64 ~]$ sms-aarch64.sh yum -y install spack-ohpc
-[root@x86_64 ~]$ sms-aarch64.sh yum -y install valgrind-ohpc
+[root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-autotools
+[root@x86_64 ~]# sms-aarch64.sh yum -y install EasyBuild-ohpc
+[root@x86_64 ~]# sms-aarch64.sh yum -y install hwloc-ohpc
+[root@x86_64 ~]# sms-aarch64.sh yum -y install spack-ohpc
+[root@x86_64 ~]# sms-aarch64.sh yum -y install valgrind-ohpc
 ```
 ### 4.2 Compilers
 
 ```sh
-[root@x86_64 ~]$ sms-aarch64.sh yum -y install gnu8-compilers-ohpc
-[root@x86_64 ~]$ sms-aarch64.sh yum -y install llvm5-compilers-ohpc
+[root@x86_64 ~]# sms-aarch64.sh yum -y install gnu8-compilers-ohpc
+[root@x86_64 ~]# sms-aarch64.sh yum -y install llvm5-compilers-ohpc
 ```
 
 ### 4.3 MPI Stacks
 
 ```sh
-[root@x86_64 ~]$ sms-aarch64.sh yum -y install openmpi3-gnu8-ohpc mpich-gnu8-ohpc
+[root@x86_64 ~]# sms-aarch64.sh yum -y install openmpi3-gnu8-ohpc mpich-gnu8-ohpc
 ```
 
 ### 4.4 Performance Tools
 
 ```sh
-[root@x86_64 ~]$ sms-aarch64.sh yum -y install ohpc-gnu8-perf-tools
-[root@x86_64 ~]$ sms-aarch64.sh yum -y install lmod-defaults-gnu8-openmpi3-ohpc
+[root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-gnu8-perf-tools
+[root@x86_64 ~]# sms-aarch64.sh yum -y install lmod-defaults-gnu8-openmpi3-ohpc
 ```
 
 ### 4.5 Setup default development environment
 
 ```sh
-[root@x86_64 ~]$ sms-aarch64.sh yum -y install lmod-defaults-gnu8-openmpi3-ohpc
+[root@x86_64 ~]# sms-aarch64.sh yum -y install lmod-defaults-gnu8-openmpi3-ohpc
 ```
 
 ### 4.6 3rd Party Libraries and Tools
 
 ```sh
-[root@x86_64 ~]$ sms-aarch64.sh yum -y install ohpc-gnu8-serial-libs
-[root@x86_64 ~]$ sms-aarch64.sh yum -y install ohpc-gnu8-io-libs
-[root@x86_64 ~]$ sms-aarch64.sh yum -y install ohpc-gnu8-python-libs
-[root@x86_64 ~]$ sms-aarch64.sh yum -y install ohpc-gnu8-runtimes
+[root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-gnu8-serial-libs
+[root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-gnu8-io-libs
+[root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-gnu8-python-libs
+[root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-gnu8-runtimes
 
-[root@x86_64 ~]$ sms-aarch64.sh yum -y install ohpc-gnu8-mpich-parallel-libs
-[root@x86_64 ~]$ sms-aarch64.sh yum -y install ohpc-gnu8-openmpi3-parallel-libs
+[root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-gnu8-mpich-parallel-libs
+[root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-gnu8-openmpi3-parallel-libs
 ```
