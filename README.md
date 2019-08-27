@@ -206,6 +206,7 @@ container.
 [root@x86_64 ~]# export AARCH64_CHROOT=/opt/ohpc-aarch64/opt/ohpc/admin/images/centos7.6
 
 # Put ssh public key
+[root@x86_64 ~]# mkdir $AARCH64_CHROOT/root/.ssh
 [root@x86_64 ~]# cat ~/.ssh/cluster.pub >> $AARCH64_CHROOT/root/.ssh/authorized_keys
 
 # Add NFS client mounts of /home and /opt/ohpc/pub to base image
@@ -263,7 +264,7 @@ BOOTSTRAP NAME            SIZE (M)      ARCH
 4.14.0-115.8.1.el7a.aarch64 23.0         aarch64
 
 # Assemble Virtual Node File System (VNFS) image
-[root@x86_64 ~]# wwvnfs --chroot $AARCH64_CHROOT
+[root@x86_64 ~]# wwvnfs --chroot $AARCH64_CHROOT centos7.6-aarch64
 
 # Notice that ARCH is x86_64
 [root@x86_64 ~]# wwsh vnfs list
