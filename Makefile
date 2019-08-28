@@ -62,6 +62,10 @@ install:
 	else \
 		docker volume create yum-aarch64 ; \
 	fi
+	if [ ! -d /opt/ohpc-aarch64/var/chroots ]; \
+	then \
+		mkdir -p /opt/ohpc-aarch64/var/chroots ; \
+	fi
 	install -o root -g root  sms-aarch64.sh $(install_path)
 
 

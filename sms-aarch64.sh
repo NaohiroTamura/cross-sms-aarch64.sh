@@ -19,11 +19,13 @@ if [ -v $HTTP_PROXY -a -v $HTTPS_PROXY ]; then
     docker run -it --rm --hostname aarch64 \
            -v ohpc-aarch64:/opt/ohpc \
            -v yum-aarch64:/var/lib/yum \
+           -v /opt/ohpc-aarch64/var/chroots:/var/chroots \
            sms-aarch64.sh $@
 else
     docker run -it --rm --hostname aarch64 \
            -v ohpc-aarch64:/opt/ohpc \
            -v yum-aarch64:/var/lib/yum \
+           -v /opt/ohpc-aarch64/var/chroots:/var/chroots \
            -e HTTP_PROXY=$HTTP_PROXY -e http_proxy=$HTTP_PROXY \
            -e HTTPS_PROXY=$HTTPS_PROXY -e https_proxy=$HTTPS_PROXY \
            -e NO_PROXY=$no_proxy -e no_proxy=$NO_PROXY \

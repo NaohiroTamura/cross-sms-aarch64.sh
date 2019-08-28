@@ -117,6 +117,13 @@ What *make install* does is the following four steps:
 DRIVER              VOLUME NAME
 local               ohpc-aarch64
 local               yum-aarch64
+[root@x86_64 cross-sms-aarch64.sh]# mkdir -p /opt/ohpc-aarch64/var/chroots
+[root@x86_64 cross-sms-aarch64.sh]# tree /opt/ohpc-aarch64/
+/opt/ohpc-aarch64/
+├── opt
+│   └── ohpc
+└── var
+    └── chroots
 
 # 4. Install docker client shell
 [root@x86_64 cross-sms-aarch64.sh]# install -o root -g root sms-aarch64.sh /usr/local/bin
@@ -169,19 +176,39 @@ don't have to set it up in the container.
 ### 3.6 Deﬁne compute image for provisioning
 
 In order to build aarch64 initial BOS Image, you need to interact with
-*sms-aarch64.sh* container. Please notice that the difference of the
+*sms-aarch64.sh* container. Be carefull about the difference of the
 prompts between *[root@x86_64 ~]#* and *[root@aarch64 /]#*
 
-Please notice the step **"cp -p /usr/bin/qemu-aarch64-static
+Note that the step **"cp -p /usr/bin/qemu-aarch64-static
 $CHROOT/usr/bin"** before invoking *wwmkchroot*". This step is
 essential to build the aarch64 initial BOS Image on SMS x86_64.
 
+The environment variable *CHROOT* is set to */var/chroots/centos7.6*
+of the container host local file system rather than
+*/opt/ohpc/admin/images/centos7.6* on NFS volume, since NFS doesn't
+support Linux Capabilities which *iputils* package requires.
+
 ```sh
+# start interactive shell. it takes time to start for the first time
+# due to volume initialization
 [root@x86_64 ~]# sms-aarch64.sh
-[root@aarch64 /]# export CHROOT=/opt/ohpc/admin/images/centos7.6
+
+# create the image on host file system, but not on NFS
+[root@aarch64 /]# export CHROOT=/var/chroots/centos7.6
+
+# the essential step
 [root@aarch64 /]# mkdir -p $CHROOT/usr/bin
 [root@aarch64 /]# cp -p /usr/bin/qemu-aarch64-static $CHROOT/usr/bin
-[root@aarch64 /]# wwmkchroot centos-7 $CHROOT
+
+# make sure wwmkchroot is returned with no error
+[root@aarch64 /]# wwmkchroot -d centos-7 $CHROOT
+...
++ echo 'Running: cleanup'
+Running: cleanup
++ cleanup
++ '[' -n '' ']'
++ return 0
+
 [root@aarch64 /]# yum -y --installroot=$CHROOT install ohpc-base-compute
 [root@aarch64 /]# cp -p /etc/resolv.conf $CHROOT/etc/resolv.conf
 [root@aarch64 /]# yum -y --installroot=$CHROOT install ohpc-slurm-client
@@ -192,22 +219,18 @@ essential to build the aarch64 initial BOS Image on SMS x86_64.
 ```
 
 The warewulf database is running on SMS x86_64, so you don't have to
-anything to the container.
+do anything to the container.
 
-Please notice that the path */opt/ohpc/admin/images/centos7.6* in the
+Please notice that the path */var/chroots/images/centos7.6* in the
 container is equivalent to the path
-*/opt/ohpc-aarch64/opt/ohpc/admin/images/centos7.6* on SMS x86_64.
+*/opt/ohpc-aarch64/var/chroots/centos7.6* on SMS x86_64.
 
-The environment variable *AARCH64_CHROOT* is chosen to prevent from
+The environment variable *AARCH64_CHROOT* is chosen to prevent us from
 mixing up *CHROOT* inside the container with *CHROOT* outside the
 container.
 
 ```sh
-[root@x86_64 ~]# export AARCH64_CHROOT=/opt/ohpc-aarch64/opt/ohpc/admin/images/centos7.6
-
-# Put ssh public key
-[root@x86_64 ~]# mkdir $AARCH64_CHROOT/root/.ssh
-[root@x86_64 ~]# cat ~/.ssh/cluster.pub >> $AARCH64_CHROOT/root/.ssh/authorized_keys
+[root@x86_64 ~]# export AARCH64_CHROOT=/opt/ohpc-aarch64/var/chroots/centos7.6
 
 # Add NFS client mounts of /home and /opt/ohpc/pub to base image
 [root@x86_64 ~]# echo "${sms_ip}:/home /home nfs nfsvers=3,nodev,nosuid 0 0" >> $AARCH64_CHROOT/etc/fstab
@@ -248,20 +271,20 @@ kernel-4.14.0-115.10.1.el7a.aarch64
 kernel-headers-4.14.0-115.10.1.el7a.aarch64
 
 # specifty the kernel version
-[root@x86_64 ~]# wwbootstrap --chroot $AARCH64_CHROOT 4.14.0-115.8.1.el7a.aarch64
+[root@x86_64 ~]# wwbootstrap --chroot $AARCH64_CHROOT 4.14.0-115.10.1.el7a.aarch64
 
 # Notice that ARCH is x86_64
 [root@x86_64 ~]# wwsh bootstrap list
 BOOTSTRAP NAME            SIZE (M)      ARCH
-4.14.0-115.8.1.el7a.aarch64 23.0          x86_64
+4.14.0-115.10.1.el7a.aarch64 23.0          x86_64
 
 # Update the ARCH
-[root@x86_64 ~]# wwsh bootstrap set -y 4.14.0-115.8.1.el7a.aarch64 -a aarch64
+[root@x86_64 ~]# wwsh bootstrap set -y 4.14.0-115.10.1.el7a.aarch64 -a aarch64
 
 # make sure that ARCH is updated to aarch64
 [root@x86_64 ~]# wwsh bootstrap list
 BOOTSTRAP NAME            SIZE (M)      ARCH
-4.14.0-115.8.1.el7a.aarch64 23.0         aarch64
+4.14.0-115.10.1.el7a.aarch64 23.0         aarch64
 
 # Assemble Virtual Node File System (VNFS) image
 [root@x86_64 ~]# wwvnfs --chroot $AARCH64_CHROOT centos7.6-aarch64
@@ -269,7 +292,7 @@ BOOTSTRAP NAME            SIZE (M)      ARCH
 # Notice that ARCH is x86_64
 [root@x86_64 ~]# wwsh vnfs list
 VNFS NAME            SIZE (M)   ARCH       CHROOT LOCATION
-centos7.6-aarch64    277.7      x86_64     /opt/ohpc-aarch64/opt/ohpc/admin/images/centos7.6
+centos7.6-aarch64    277.7      x86_64     /opt/ohpc-aarch64/var/chroots/centos7.6
 
 # Update the ARCH
 [root@x86_64 ~]# wwsh vnfs set -y centos7.6-aarch64 -a aarch64
@@ -277,17 +300,17 @@ centos7.6-aarch64    277.7      x86_64     /opt/ohpc-aarch64/opt/ohpc/admin/imag
 # make sure that ARCH is updated to aarch64
 [root@x86_64 ~]# wwsh vnfs list
 VNFS NAME            SIZE (M)   ARCH       CHROOT LOCATION
-centos7.6-aarch64    277.7      aarch64    /opt/ohpc-aarch64/opt/ohpc/admin/images/centos7.6
+centos7.6-aarch64    277.7      aarch64    /opt/ohpc-aarch64/var/chroots/centos7.6
 
 # Add nodes to Warewulf data store
 [root@x86_64 /]# wwsh node new ${c_name} --arch=aarch64 --ipaddr=${c_ip} --hwaddr=${c_mac} -D ${eth_provision}
 
 # Define provisioning image for hosts
-[root@x86_64 /]# wwsh provision set "${compute_regex}" --vnfs=centos7.6-aarch64 --bootstrap=4.14.0-115.8.1.el7a.aarch64 \
+[root@x86_64 /]# wwsh provision set "${compute_regex}" --vnfs=centos7.6-aarch64 --bootstrap=4.14.0-115.10.1.el7a.aarch64 \
 --files=dynamic_hosts,passwd,group,shadow,slurm.conf,munge.key,network
 
 # Define provisioning image for hosts
-[root@x86_64 /]# wwsh -y provision set em1n1 --kargs="net.ifnames=0 biosdevname=0 console=ttyAMA0,115200 rd.debug"
+[root@x86_64 /]# wwsh -y provision set ${c_name} --kargs="net.ifnames=0 biosdevname=0 console=ttyAMA0,115200 rd.debug"
 
 # Restart dhcp / update PXE
 [root@x86_64 /]# systemctl restart dhcpd
