@@ -66,7 +66,7 @@ HTTPS_PROXY environment variables.
 
 ### make
 
-What *make* does is to  build docker container named *sms-aarch64.sh*.
+What *make* does is to build docker container named *sms-aarch64.sh*.
 
 *qemu-aarch64-static* binary is retrieved from Ubuntu package, since
 it's static binary which can run on any Linux.
@@ -76,9 +76,18 @@ put your compiled *qemu-aarch64-static* under *usr/bin* directory so
 as not to download from Ubuntu.
 
 ```sh
+# setup binfmt_misc for aarch64
+[root@x86_64 cross-sms-aarch64.sh]# cp -p etc/binfmt.d/aarch64.conf /etc/binfmt.d
+[root@x86_64 cross-sms-aarch64.sh]# systemctl restart systemd-binfmt
+
+# make sure that /proc/sys/fs/binfmt_misc/aarch64 is created
+[root@x86_64 cross-sms-aarch64.sh]# ll /proc/sys/fs/binfmt_misc/aarch64
+
+# download qemu-aarch64-static
 [root@x86_64 cross-sms-aarch64.sh]# wget http://security.ubuntu.com/ubuntu/pool/universe/q/qemu/qemu-user-static_3.1+dfsg-2ubuntu3.1_amd64.deb
 [root@x86_64 cross-sms-aarch64.sh]# ar p qemu-user-static_3.1+dfsg-2ubuntu3.1_amd64.deb data.tar.xz | tar Jxvf - ./usr/bin/qemu-aarch64-static
 
+# build container
 [root@x86_64 cross-sms-aarch64.sh]# docker build -f Dockerfile.centos7 -t sms-aarch64.sh .
 ```
 
@@ -86,7 +95,7 @@ as not to download from Ubuntu.
 
 What *make install* does is the following four steps:
 
-1. setup binfmt_misc for aarch64
+1. set up binfmt_misc for aarch64 if it doesn't exist
 2. export /opt/ohpc-aarch64/opt/ohpc from master server to docker
    container
 3. create Docker NFS volume and local volume
@@ -96,11 +105,11 @@ What *make install* does is the following four steps:
 4. Install docker client shell, sms-aarch64.sh
 
 ```sh
-# 1. setup binfmt_misc for aarch64
-[root@x86_64 cross-sms-aarch64.sh]# cp -p etc/binfmt.d/aarch64.conf /etc/binfmt.d
-[root@x86_64 cross-sms-aarch64.sh]# systemctl restart systemd-binfmt
-[root@x86_64 cross-sms-aarch64.sh]# ll /proc/sys/fs/binfmt_misc/aarch64
--rw-r--r-- 1 root root 0 Aug 22 11:04 /proc/sys/fs/binfmt_misc/aarch64
+# 1. set up binfmt_misc if /proc/sys/fs/binfmt_misc/aarch64 doesn't exist
+[root@x86_64 cross-sms-aarch64.sh]# if [ ! -e /proc/sys/fs/binfmt_misc/aarch64 ]; then \
+> cp -p etc/binfmt.d/aarch64.conf /etc/binfmt.d; \
+> systemctl restart systemd-binfmt; \
+> fi
 
 # 2. export /opt/ohpc-aarch64/opt/ohpc from master server to docker container
 [root@x86_64 cross-sms-aarch64.sh]# mkdir -p /opt/ohpc-aarch64/opt/ohpc

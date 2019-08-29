@@ -29,7 +29,7 @@ install:
 		echo "please set shell variable 'sms_ip'. ex. make install sms_ip=XX.XX.XX.XX" && \
 		exit 1 ; \
 	fi
-	if [ ! -e /etc/binfmt.d/aarch64.conf ]; \
+	if [ ! -e /proc/sys/fs/binfmt_misc/aarch64 ]; \
 	then \
 		cp -p etc/binfmt.d/aarch64.conf /etc/binfmt.d && \
 		systemctl restart systemd-binfmt ; \
@@ -37,6 +37,7 @@ install:
 	if [ ! -e /proc/sys/fs/binfmt_misc/aarch64 ]; \
 	then \
 		echo "failed binfmt_misc setup" ; \
+		exit 1 ; \
 	fi
 	if [ ! -d /opt/ohpc-aarch64/opt/ohpc ]; \
 	then \
@@ -71,6 +72,16 @@ install:
 
 build:
 	@echo "building docker container"
+	if [ ! -e /proc/sys/fs/binfmt_misc/aarch64 ]; \
+	then \
+		cp -p etc/binfmt.d/aarch64.conf /etc/binfmt.d && \
+		systemctl restart systemd-binfmt ; \
+	fi
+	if [ ! -e /proc/sys/fs/binfmt_misc/aarch64 ]; \
+	then \
+		echo "failed binfmt_misc setup" ; \
+		exit 1 ; \
+	fi
 	if [ ! -e usr/bin/qemu-aarch64-static ]; \
 	then \
 		wget http://security.ubuntu.com/ubuntu/pool/universe/q/qemu/qemu-user-static_3.1+dfsg-2ubuntu3.1_amd64.deb && \
