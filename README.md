@@ -30,7 +30,7 @@ SMS x86_64 requires the following softwares have been installed.
 
 * OpenHPC 1.3.8 (11 June 2019) following [CentOS 7.6 x86_64 Install
   guide with Warewulf + Slurm][2]
-* Docker docker-1.13.1-102.git7f2769b.el7.centos.x86_64
+* Docker 1.13.1 or later
 
 Type the following commands to verify the software versions:
 
@@ -379,3 +379,83 @@ shell as follows.
 [root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-gnu8-mpich-parallel-libs
 [root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-gnu8-openmpi3-parallel-libs
 ```
+
+## Tips
+
+### Local Repository
+
+If OHPC cluster is isolated from Internet, a local copy of OHPC,
+RHEL/CentOS EPEL and other repositories can be used by specifying the
+two environment variables, **YUM_REPOS_D** and **LOCAL_REPO**.
+
+1. make and backup in Internet accessible host
+
+    ```sh
+    [root@x86_64 cross-sms-aarch64.sh]# make
+
+    [root@x86_64 cross-sms-aarch64.sh]# docker save docker.io/arm64v8/centos:7 | gzip > arm64v8_centos_7.tar.gz
+
+    [root@x86_64 cross-sms-aarch64.sh]# docker save sms-aarch64.sh:latest | gzip > sms-aarch64.sh.tar.gz
+
+    [root@x86_64 cross-sms-aarch64.sh]# cd ..
+
+    [root@x86_64 ~]# tar zcvf cross-sms-aarch64.sh.tar.gz cross-sms-aarch64.sh
+    ```
+
+2. restore and make install in Internet isolated host
+
+    ```sh
+    [root@x86_64 ~]# tar zxvf cross-sms-aarch64.sh.tar.gz
+
+    [root@x86_64 cross-sms-aarch64.sh]# docker load < arm64v8_centos_7.tar.gz
+
+    [root@x86_64 cross-sms-aarch64.sh]# docker load < sms-aarch64.sh.tar.gz
+
+    [root@x86_64 cross-sms-aarch64.sh]# make install sms_ip=XX.XX.XX.XX
+    ```
+
+3. set environment variables and run sms-aarch64.sh
+
+    * Set yum repo files path of the container host to the environment
+      variable **YUM_REPOS_D** which is mapped to */etc/yum.repos.d*
+      in the container.
+    * Set the local repository path of the container host to the
+      environment variable **LOCAL_REPO** which is mapped to
+      */{repo_name}* in the container if **LOCAL_REPO** is created in
+      */opt/ohpc-aarch64* such as */opt/ohpc-aarch64/{repo_name}*
+
+    ```sh
+    [root@x86_64 ~]# export YUM_REPOS_D=/opt/ohpc-aarch64/etc/yum.repos.d
+
+    [root@x86_64 ~]# ls $YUM_REPOS_D
+    centos-7.6.repo epel-7.repo OpenHPC.local.repo
+
+    [root@x86_64 ~]# export LOCAL_REPO=/opt/ohpc-aarch64/repos
+
+    [root@x86_64 ~]# ls $LOCAL_REPO
+    CentOS_7 centos-7.6 epel-7
+
+    [root@x86_64 ~]# sms-aarch64.sh
+
+    [root@aarch64 /]# ls /etc/yum.repos.d
+    centos-7.6  epel-7  OpenHPC.local.repo
+
+    [root@aarch64 /]# ls /repos
+    centos-7.6.repo epel-7.repo OpenHPC.local.repo
+    ```
+
+    * if **LOCAL_REPO** path is **NOT** in */opt/ohpc-aarch64* of the
+      container host such as */repos*, it is mapped to the same path
+      in the container such as */repos* in this case as below.
+
+    ```sh
+    [root@x86_64 ~]# export LOCAL_REPO=/repos
+
+    [root@x86_64 ~]# ls $LOCAL_REPO
+    CentOS_7  centos-7.6  epel-7
+
+    [root@x86_64 ~]# sms-aarch64.sh
+
+    [root@aarch64 /]# ls /repos
+    CentOS_7  centos-7.6  epel-7
+    ```

@@ -15,19 +15,30 @@
 # under the License.
 #
 
-if [ -v $HTTP_PROXY -a -v $HTTPS_PROXY ]; then 
-    docker run -it --rm --hostname aarch64 \
-           -v ohpc-aarch64:/opt/ohpc \
-           -v yum-aarch64:/var/lib/yum \
-           -v /opt/ohpc-aarch64/var/chroots:/var/chroots \
-           sms-aarch64.sh $@
+if [ -v $YUM_REPOS_D -a -v $LOCAL_REPO ]; then
+    volume_options="-v ohpc-aarch64:/opt/ohpc \
+                    -v yum-aarch64:/var/lib/yum \
+                    -v /opt/ohpc-aarch64/var/chroots:/var/chroots"
 else
-    docker run -it --rm --hostname aarch64 \
-           -v ohpc-aarch64:/opt/ohpc \
-           -v yum-aarch64:/var/lib/yum \
-           -v /opt/ohpc-aarch64/var/chroots:/var/chroots \
-           -e HTTP_PROXY=$HTTP_PROXY -e http_proxy=$HTTP_PROXY \
-           -e HTTPS_PROXY=$HTTPS_PROXY -e https_proxy=$HTTPS_PROXY \
-           -e NO_PROXY=$no_proxy -e no_proxy=$NO_PROXY \
-           sms-aarch64.sh $@
+    volume_options="-v ohpc-aarch64:/opt/ohpc \
+                    -v yum-aarch64:/var/lib/yum \
+                    -v /opt/ohpc-aarch64/var/chroots:/var/chroots \
+                    -v ${YUM_REPOS_D}:/etc/yum.repos.d \
+                    -v ${LOCAL_REPO}:${LOCAL_REPO/opt\/ohpc-aarch64\//}"
 fi
+
+if [ -v $HTTP_PROXY -a -v $HTTPS_PROXY ]; then
+    proxy_options=
+else
+    proxy_options="-e HTTP_PROXY=$HTTP_PROXY \
+                   -e http_proxy=$HTTP_PROXY \
+                   -e HTTPS_PROXY=$HTTPS_PROXY \
+                   -e https_proxy=$HTTPS_PROXY \
+                   -e NO_PROXY=$NO_PROXY \
+                   -e no_proxy=$NO_PROXY"
+fi
+
+docker run -it --rm --hostname aarch64 \
+       $volume_options \
+       $proxy_options \
+       sms-aarch64.sh $@
