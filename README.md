@@ -28,8 +28,8 @@ install aarch64 OpenHPC Development Components into
 
 SMS x86_64 requires the following softwares have been installed.
 
-* OpenHPC 1.3.8 (11 June 2019) following [CentOS 7.6 x86_64 Install
-  guide with Warewulf + Slurm][2]
+* [OpenHPC 1.3.8 (11 June 2019)][2] or [OpenHPC 1.3.9 (12 November
+  2019)][3]
 * Docker 1.13.1 or later
 
 Type the following commands to verify the software versions:
@@ -44,6 +44,7 @@ ohpc-base-1.3.8-3.1.ohpc.1.3.8.x86_64
 ```
 
 [2]: https://github.com/openhpc/ohpc/releases/download/v1.3.8.GA/Install_guide-CentOS7-Warewulf-SLURM-1.3.8-x86_64.pdf "CentOS 7.6 x86_64 Install guide with Warewulf + Slurm"
+[3]: https://github.com/openhpc/ohpc/releases/download/v1.3.9.GA/Install_guide-CentOS7-Warewulf-SLURM-1.3.9-x86_64.pdf "CentOS 7.7 x86_64 Install guide with Warewulf + Slurm"
 
 
 ## Build and Install
@@ -148,13 +149,13 @@ local               yum-aarch64
 
 Heading title hereinafter refers to the section of OpenHPC 1.3.8
 (11 June 2019) [CentOS 7.6 aarch64 Install guide with Warewulf +
-Slurm][3].
+Slurm][4].
 
 Please notice that the section number of [CentOS 7.6 aarch64 Install
 guide with Warewulf + Slurm][3] is slightly different from [CentOS
 7.6 x86_64 Install guide with Warewulf + Slurm][2].
 
-[3]:  https://github.com/openhpc/ohpc/releases/download/v1.3.8.GA/Install_guide-CentOS7-Warewulf-SLURM-1.3.8-aarch64.pdf "CentOS 7.6 aarch64 Install guide with Warewulf + Slurm"
+[4]:  https://github.com/openhpc/ohpc/releases/download/v1.3.8.GA/Install_guide-CentOS7-Warewulf-SLURM-1.3.8-aarch64.pdf "CentOS 7.6 aarch64 Install guide with Warewulf + Slurm"
 
 ### 3.1 Enable OpenHPC repository for local use
 
