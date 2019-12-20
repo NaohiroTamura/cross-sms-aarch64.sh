@@ -1,0 +1,38 @@
+# Copyright 2020 FUJITSU LIMITED
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+
+FROM opensuse/leap@sha256:f7e0ee9ff8e7755dccccb1745122952ef71cf7d25ffc372383b4b01f1f31247c
+
+ADD usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
+
+RUN zypper update -y && zypper -n install curl openssh which file iproute2 vim
+
+
+# ------------------------------------------------------------
+# Enable OpenHPC repository for local use (Section 3.1)
+# ------------------------------------------------------------
+#RUN rpm -ivh http://repos.openhpc.community/OpenHPC/2.0/Leap_15/aarch64/ohpc-release-2-0.1.ohpc.2.0.aarch64.rpm && \
+# Until OHPC 2.0 becomes available, start "docker host:~# python3 -m http.server"
+RUN rpm -ivh --nosignature http://172.17.0.1:8000/rpmbuild/RPMS/aarch64/ohpc-release-2-0.1.ohpc.2.0.aarch64.rpm && \
+
+# ------------------------------------------------------------
+# Add baseline OpenHPC and provisioning services (Section 3.3)
+# ------------------------------------------------------------
+    zypper -n install ohpc-base ohpc-warewulf
+
+
+VOLUME ["/opt/ohpc", "/var/lib/zypp"]
+
+CMD ["/bin/bash"]
