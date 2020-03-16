@@ -14,14 +14,22 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
+if [ -e /var/lib/yum ]; then
+    package_volume=/var/lib/yum
+elif [ -e /var/lib/zypp ]; then
+    package_volume=/var/lib/zypp
+else
+    echo "unknown system"
+    exit 1
+fi
 
 if [ -v $YUM_REPOS_D -a -v $LOCAL_REPO ]; then
     volume_options="-v ohpc-aarch64:/opt/ohpc \
-                    -v yum-aarch64:/var/lib/yum \
+                    -v yum-aarch64:$package_volume \
                     -v /opt/ohpc-aarch64/var/chroots:/var/chroots"
 else
     volume_options="-v ohpc-aarch64:/opt/ohpc \
-                    -v yum-aarch64:/var/lib/yum \
+                    -v yum-aarch64:$package_volume \
                     -v /opt/ohpc-aarch64/var/chroots:/var/chroots \
                     -v ${YUM_REPOS_D}:/etc/yum.repos.d \
                     -v ${LOCAL_REPO}:${LOCAL_REPO/opt\/ohpc-aarch64\//}"
