@@ -16,6 +16,8 @@
 #
 if [ -e /var/lib/yum ]; then
     package_volume=/var/lib/yum
+elif [ -e /var/lib/dnf ]; then
+    package_volume=/var/lib/dnf
 elif [ -e /var/lib/zypp ]; then
     package_volume=/var/lib/zypp
 else
