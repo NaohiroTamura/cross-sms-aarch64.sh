@@ -258,7 +258,9 @@ container.
 ### 3.7 Finalizing provisioning conﬁguration
 
 In order to create aarch64 bootstrap, please make sure to install
-*warewulf-provision-initramfs-aarch64-ohpc* package into SMS x86_64.
+*warewulf-provision-initramfs-aarch64-ohpc* package and
+*warewulf-provision-server-ipxe-aarch64-ohpc* package into SMS
+x86_64.
 
 The kernel version of the aarch64 initial OBS image is different from
 the kernel version of SMS x86_64. So please check the version as
@@ -269,7 +271,7 @@ on x86_64 has *ARCH* attribute *x86_64* respectively. So please update
 the ARCH attribute as follows.
 
 ```sh
-[root@x86_64 ~]# yum install -y warewulf-provision-initramfs-aarch64-ohpc
+[root@x86_64 ~]# yum install -y warewulf-provision-initramfs-aarch64-ohpc warewulf-provision-server-ipxe-aarch64-ohpc
 
 [root@x86_64 ~]# export WW_CONF=/etc/warewulf/bootstrap.conf
 [root@x86_64 ~]# echo "drivers += updates/kernel/" >> $WW_CONF
