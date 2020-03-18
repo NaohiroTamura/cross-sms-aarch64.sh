@@ -3,7 +3,7 @@
 This software is [OpenHPC][1] utility which enables without physical
 aarch64 machine to create aarch64 initial build image, Base Operating
 System (BOS), and to install aarch64 OpenHPC Development Components on
-System anagement Server (SMS) x86_64.
+System Management Server (SMS) x86_64.
 As the result, it achieves effective machine resources usage, and
 facilitates to deploy and manage Compute Nodes both x86_64 and
 aarch64.
@@ -28,24 +28,24 @@ install aarch64 OpenHPC Development Components into
 
 SMS x86_64 requires the following softwares have been installed.
 
-* [OpenHPC 1.3.8 (11 June 2019)][2] or [OpenHPC 1.3.9 (12 November
-  2019)][3]
-* Docker 1.13.1 or later
+* [OpenHPC 1.3.9 (12 November 2019)][2] or [OpenHPC 2.0 (2020/1Q)][3]
+* Docker/Docker-ce 1.13.1 later, or Podman 1.7.0 later (1.6.4 doesn't support NFS volume)
 
 Type the following commands to verify the software versions:
 
 ```sh
-[root@x86_64 ~]# docker version | grep Package
- Package version: docker-1.13.1-102.git7f2769b.el7.centos.x86_64
- Package version: docker-1.13.1-102.git7f2769b.el7.centos.x86_64
-
 [root@x86_64 ~]# rpm -qa | grep ohpc-base
 ohpc-base-1.3.8-3.1.ohpc.1.3.8.x86_64
+
+[root@x86_64 ~]# docker -v
+Docker version 1.13.1, build cccb291/1.13.1
+
+[root@x86_64 ~]# podman -v
+podman version 1.7.0
 ```
 
-[2]: https://github.com/openhpc/ohpc/releases/download/v1.3.8.GA/Install_guide-CentOS7-Warewulf-SLURM-1.3.8-x86_64.pdf "CentOS 7.6 x86_64 Install guide with Warewulf + Slurm"
-[3]: https://github.com/openhpc/ohpc/releases/download/v1.3.9.GA/Install_guide-CentOS7-Warewulf-SLURM-1.3.9-x86_64.pdf "CentOS 7.7 x86_64 Install guide with Warewulf + Slurm"
-
+[2]: https://github.com/openhpc/ohpc/releases/download/v1.3.9.GA/Install_guide-CentOS7-Warewulf-SLURM-1.3.9-x86_64.pdf "CentOS 7.7 x86_64 Install guide with Warewulf + Slurm"
+[3]: https://github.com/openhpc/ohpc/milestone/16 "OpenHPC 2.0 is not available as of March 20th 2020"
 
 ## Build and Install
 
@@ -56,87 +56,19 @@ If you are behind organization's firewall, set HTTP_PROXY and
 HTTPS_PROXY environment variables.
 
 ```sh
+1. clone
 [root@x86_64 ~]# git clone https://github.com/NaohiroTamura/cross-sms-aarch64.sh
 
+2. change directory
 [root@x86_64 ~]# cd cross-sms-aarch64.sh
 
-[root@x86_64 cross-sms-aarch64.sh]# make
+3. make depends on OS and OpenHPC version
+[root@x86_64 cross-sms-aarch64.sh]# make                  # CentOS 7.7 for OpenHPC 1.3.9
+[root@x86_64 cross-sms-aarch64.sh]# make base_os=centos8  # CentOS 8.1 for OpenHPC 2.0
+[root@x86_64 cross-sms-aarch64.sh]# make base_os=leap15   # Leap 15.1  for OpenHPC 2.0
 
+4. install
 [root@x86_64 cross-sms-aarch64.sh]# make install sms_ip=XX.XX.XX.XX
-```
-
-### make
-
-What *make* does is to build docker container named *sms-aarch64.sh*.
-
-*qemu-aarch64-static* binary is retrieved from Ubuntu package, since
-it's static binary which can run on any Linux.
-
-If you prefer to compile *qemu-aarch64-static* from QEMU source code,
-put your compiled *qemu-aarch64-static* under *usr/bin* directory so
-as not to download from Ubuntu.
-
-```sh
-# setup binfmt_misc for aarch64
-[root@x86_64 cross-sms-aarch64.sh]# cp -p etc/binfmt.d/aarch64.conf /etc/binfmt.d
-[root@x86_64 cross-sms-aarch64.sh]# systemctl restart systemd-binfmt
-
-# make sure that /proc/sys/fs/binfmt_misc/aarch64 is created
-[root@x86_64 cross-sms-aarch64.sh]# ll /proc/sys/fs/binfmt_misc/aarch64
-
-# download qemu-aarch64-static
-[root@x86_64 cross-sms-aarch64.sh]# wget http://security.ubuntu.com/ubuntu/pool/universe/q/qemu/qemu-user-static_3.1+dfsg-2ubuntu3.1_amd64.deb
-[root@x86_64 cross-sms-aarch64.sh]# ar p qemu-user-static_3.1+dfsg-2ubuntu3.1_amd64.deb data.tar.xz | tar Jxvf - ./usr/bin/qemu-aarch64-static
-
-# build container
-[root@x86_64 cross-sms-aarch64.sh]# docker build -f Dockerfile.centos7 -t sms-aarch64.sh .
-```
-
-### make install
-
-What *make install* does is the following four steps:
-
-1. set up binfmt_misc for aarch64 if it doesn't exist
-2. export /opt/ohpc-aarch64/opt/ohpc from master server to docker
-   container
-3. create Docker NFS volume and local volume
-   * Docker volume has to be empty. If not, docker doesn't initialize
-     the volume at the first time invocation. Otherwise it causes
-     inconsistency.
-4. Install docker client shell, sms-aarch64.sh
-
-```sh
-# 1. set up binfmt_misc if /proc/sys/fs/binfmt_misc/aarch64 doesn't exist
-[root@x86_64 cross-sms-aarch64.sh]# if [ ! -e /proc/sys/fs/binfmt_misc/aarch64 ]; then \
-> cp -p etc/binfmt.d/aarch64.conf /etc/binfmt.d; \
-> systemctl restart systemd-binfmt; \
-> fi
-
-# 2. export /opt/ohpc-aarch64/opt/ohpc from master server to docker container
-[root@x86_64 cross-sms-aarch64.sh]# mkdir -p /opt/ohpc-aarch64/opt/ohpc
-[root@x86_64 cross-sms-aarch64.sh]# echo "/opt/ohpc-aarch64/opt/ohpc 172.17.0.0/16(rw,no_subtree_check,no_root_squash) ${sms_ip}/32(rw,no_subtree_check,no_root_squash)" >> /etc/exports
-[root@x86_64 cross-sms-aarch64.sh]# exportfs -ra
-
-# 3. create Docker NFS volume and local volume
-[root@x86_64 cross-sms-aarch64.sh]# docker volume create --driver local \
-  --opt type=nfs \
-  --opt o=addr=${sms_ip},rw,nfsvers=3 \
-  --opt device=:/opt/ohpc-aarch64/opt/ohpc ohpc-aarch64
-[root@x86_64 cross-sms-aarch64.sh]# docker volume create yum-aarch64
-[root@x86_64 cross-sms-aarch64.sh]# docker volume ls
-DRIVER              VOLUME NAME
-local               ohpc-aarch64
-local               yum-aarch64
-[root@x86_64 cross-sms-aarch64.sh]# mkdir -p /opt/ohpc-aarch64/var/chroots
-[root@x86_64 cross-sms-aarch64.sh]# tree /opt/ohpc-aarch64/
-/opt/ohpc-aarch64/
-├── opt
-│   └── ohpc
-└── var
-    └── chroots
-
-# 4. Install docker client shell
-[root@x86_64 cross-sms-aarch64.sh]# install -o root -g root sms-aarch64.sh /usr/local/bin
 ```
 
 ## Usage
@@ -147,20 +79,20 @@ local               yum-aarch64
 2. install aarch64 OpenHPC Development Components into SMS x86_64 file
    system
 
-Heading title hereinafter refers to the section of OpenHPC 1.3.8
-(11 June 2019) [CentOS 7.6 aarch64 Install guide with Warewulf +
+Heading title hereinafter refers to the section of OpenHPC 1.3.9
+(12 November 2019) [CentOS 7.7 aarch64 Install guide with Warewulf +
 Slurm][4].
 
-Please notice that the section number of [CentOS 7.6 aarch64 Install
+Please notice that the section number of [CentOS 7.7 aarch64 Install
 guide with Warewulf + Slurm][3] is slightly different from [CentOS
-7.6 x86_64 Install guide with Warewulf + Slurm][2].
+7.7 x86_64 Install guide with Warewulf + Slurm][2].
 
-[4]:  https://github.com/openhpc/ohpc/releases/download/v1.3.8.GA/Install_guide-CentOS7-Warewulf-SLURM-1.3.8-aarch64.pdf "CentOS 7.6 aarch64 Install guide with Warewulf + Slurm"
+[4]: https://github.com/openhpc/ohpc/releases/download/v1.3.9.GA/Install_guide-CentOS7-Warewulf-SLURM-1.3.9-aarch64.pdf "CentOS 7.7 aarch64 Install guide with Warewulf + Slurm"
 
 ### 3.1 Enable OpenHPC repository for local use
 
 The ohpc-release package has been already installed onto CentOS
-7.6.1810 container. Please take a look at Dockerfile.centos7.
+7.7.1910 container. Please take a look at Dockerfile.centos7.
 
 ### 3.2 Installation template
 
@@ -186,16 +118,16 @@ don't have to set it up in the container.
 ### 3.6 Deﬁne compute image for provisioning
 
 In order to build aarch64 initial BOS Image, you need to interact with
-*sms-aarch64.sh* container. Be carefull about the difference of the
+*sms-aarch64.sh* container. Be careful about the difference of the
 prompts between *[root@x86_64 ~]#* and *[root@aarch64 /]#*
 
 Note that the step **"cp -p /usr/bin/qemu-aarch64-static
 $CHROOT/usr/bin"** before invoking *wwmkchroot*". This step is
 essential to build the aarch64 initial BOS Image on SMS x86_64.
 
-The environment variable *CHROOT* is set to */var/chroots/centos7.6*
+The environment variable *CHROOT* is set to */var/chroots/centos7.7*
 of the container host local file system rather than
-*/opt/ohpc/admin/images/centos7.6* on NFS volume, since NFS doesn't
+*/opt/ohpc/admin/images/centos7.7* on NFS volume, since NFS doesn't
 support Linux Capabilities which *iputils* package requires.
 
 ```sh
@@ -204,7 +136,7 @@ support Linux Capabilities which *iputils* package requires.
 [root@x86_64 ~]# sms-aarch64.sh
 
 # create the image on host file system, but not on NFS
-[root@aarch64 /]# export CHROOT=/var/chroots/centos7.6
+[root@aarch64 /]# export CHROOT=/var/chroots/centos7.7
 
 # the essential step
 [root@aarch64 /]# mkdir -p $CHROOT/usr/bin
@@ -231,16 +163,16 @@ Running: cleanup
 The warewulf database is running on SMS x86_64, so you don't have to
 do anything to the container.
 
-Please notice that the path */var/chroots/images/centos7.6* in the
+Please notice that the path */var/chroots/images/centos7.7* in the
 container is equivalent to the path
-*/opt/ohpc-aarch64/var/chroots/centos7.6* on SMS x86_64.
+*/opt/ohpc-aarch64/var/chroots/centos7.7* on SMS x86_64.
 
 The environment variable *AARCH64_CHROOT* is chosen to prevent us from
 mixing up *CHROOT* inside the container with *CHROOT* outside the
 container.
 
 ```sh
-[root@x86_64 ~]# export AARCH64_CHROOT=/opt/ohpc-aarch64/var/chroots/centos7.6
+[root@x86_64 ~]# export AARCH64_CHROOT=/opt/ohpc-aarch64/var/chroots/centos7.7
 
 # Add NFS client mounts of /home and /opt/ohpc/pub to base image
 [root@x86_64 ~]# echo "${sms_ip}:/home /home nfs nfsvers=3,nodev,nosuid 0 0" >> $AARCH64_CHROOT/etc/fstab
@@ -299,26 +231,26 @@ BOOTSTRAP NAME            SIZE (M)      ARCH
 4.14.0-115.10.1.el7a.aarch64 23.0         aarch64
 
 # Assemble Virtual Node File System (VNFS) image
-[root@x86_64 ~]# wwvnfs --chroot $AARCH64_CHROOT centos7.6-aarch64
+[root@x86_64 ~]# wwvnfs --chroot $AARCH64_CHROOT centos7.7-aarch64
 
 # Notice that ARCH is x86_64
 [root@x86_64 ~]# wwsh vnfs list
 VNFS NAME            SIZE (M)   ARCH       CHROOT LOCATION
-centos7.6-aarch64    277.7      x86_64     /opt/ohpc-aarch64/var/chroots/centos7.6
+centos7.7-aarch64    277.7      x86_64     /opt/ohpc-aarch64/var/chroots/centos7.7
 
 # Update the ARCH
-[root@x86_64 ~]# wwsh vnfs set -y centos7.6-aarch64 -a aarch64
+[root@x86_64 ~]# wwsh vnfs set -y centos7.7-aarch64 -a aarch64
 
 # make sure that ARCH is updated to aarch64
 [root@x86_64 ~]# wwsh vnfs list
 VNFS NAME            SIZE (M)   ARCH       CHROOT LOCATION
-centos7.6-aarch64    277.7      aarch64    /opt/ohpc-aarch64/var/chroots/centos7.6
+centos7.7-aarch64    277.7      aarch64    /opt/ohpc-aarch64/var/chroots/centos7.7
 
-# Add nodes to Warewulf data store
+# Add nodes to Warewulf data store as aarch64
 [root@x86_64 /]# wwsh node new ${c_name} --arch=aarch64 --ipaddr=${c_ip} --hwaddr=${c_mac} -D ${eth_provision}
 
 # Define provisioning image for hosts
-[root@x86_64 /]# wwsh provision set "${compute_regex}" --vnfs=centos7.6-aarch64 --bootstrap=4.14.0-115.10.1.el7a.aarch64 \
+[root@x86_64 /]# wwsh provision set "${compute_regex}" --vnfs=centos7.7-aarch64 --bootstrap=4.14.0-115.10.1.el7a.aarch64 \
 --files=dynamic_hosts,passwd,group,shadow,slurm.conf,munge.key,network
 
 # Define provisioning image for hosts
@@ -431,20 +363,20 @@ two environment variables, **YUM_REPOS_D** and **LOCAL_REPO**.
     [root@x86_64 ~]# export YUM_REPOS_D=/opt/ohpc-aarch64/etc/yum.repos.d
 
     [root@x86_64 ~]# ls $YUM_REPOS_D
-    centos-7.6.repo epel-7.repo OpenHPC.local.repo
+    centos-7.7.repo epel-7.repo OpenHPC.local.repo
 
     [root@x86_64 ~]# export LOCAL_REPO=/opt/ohpc-aarch64/repos
 
     [root@x86_64 ~]# ls $LOCAL_REPO
-    CentOS_7 centos-7.6 epel-7
+    CentOS_7 centos-7.7 epel-7
 
     [root@x86_64 ~]# sms-aarch64.sh
 
     [root@aarch64 /]# ls /etc/yum.repos.d
-    centos-7.6  epel-7  OpenHPC.local.repo
+    centos-7.7  epel-7  OpenHPC.local.repo
 
     [root@aarch64 /]# ls /repos
-    centos-7.6.repo epel-7.repo OpenHPC.local.repo
+    centos-7.7.repo epel-7.repo OpenHPC.local.repo
     ```
 
     * if **LOCAL_REPO** path is **NOT** in */opt/ohpc-aarch64* of the
@@ -455,10 +387,86 @@ two environment variables, **YUM_REPOS_D** and **LOCAL_REPO**.
     [root@x86_64 ~]# export LOCAL_REPO=/repos
 
     [root@x86_64 ~]# ls $LOCAL_REPO
-    CentOS_7  centos-7.6  epel-7
+    CentOS_7  centos-7.7  epel-7
 
     [root@x86_64 ~]# sms-aarch64.sh
 
     [root@aarch64 /]# ls /repos
-    CentOS_7  centos-7.6  epel-7
+    CentOS_7  centos-7.7  epel-7
     ```
+
+## Develeopment Information
+
+### make
+
+What *make* does is to build docker container named *sms-aarch64.sh*.
+
+*qemu-aarch64-static* binary is retrieved from Ubuntu package, since
+it's static binary which can run on any Linux.
+
+If you prefer to compile *qemu-aarch64-static* from QEMU source code,
+put your compiled *qemu-aarch64-static* under *usr/bin* directory so
+as not to download from Ubuntu.
+
+```sh
+# setup binfmt_misc for aarch64
+[root@x86_64 cross-sms-aarch64.sh]# cp -p etc/binfmt.d/aarch64.conf /etc/binfmt.d
+[root@x86_64 cross-sms-aarch64.sh]# systemctl restart systemd-binfmt
+
+# make sure that /proc/sys/fs/binfmt_misc/aarch64 is created
+[root@x86_64 cross-sms-aarch64.sh]# ll /proc/sys/fs/binfmt_misc/aarch64
+
+# download qemu-aarch64-static
+[root@x86_64 cross-sms-aarch64.sh]# wget http://security.ubuntu.com/ubuntu/pool/universe/q/qemu/qemu-user-static_3.1+dfsg-2ubuntu3.1_amd64.deb
+[root@x86_64 cross-sms-aarch64.sh]# ar p qemu-user-static_3.1+dfsg-2ubuntu3.1_amd64.deb data.tar.xz | tar Jxvf - ./usr/bin/qemu-aarch64-static
+
+# build container in case of CentOS 7.7 for OpenHPC 1.3.9
+[root@x86_64 cross-sms-aarch64.sh]# docker build -f Dockerfile.centos7 -t sms-aarch64.sh .
+```
+
+### make install
+
+What *make install* does is the following four steps:
+
+1. set up binfmt_misc for aarch64 if it doesn't exist
+2. export /opt/ohpc-aarch64/opt/ohpc from master server to docker
+   container
+3. create Docker NFS volume and local volume
+   * Docker volume has to be empty. If not, docker doesn't initialize
+     the volume at the first time invocation. Otherwise it causes
+     inconsistency.
+4. Install docker client shell, sms-aarch64.sh
+
+```sh
+# 1. set up binfmt_misc if /proc/sys/fs/binfmt_misc/aarch64 doesn't exist
+[root@x86_64 cross-sms-aarch64.sh]# if [ ! -e /proc/sys/fs/binfmt_misc/aarch64 ]; then \
+> cp -p etc/binfmt.d/aarch64.conf /etc/binfmt.d; \
+> systemctl restart systemd-binfmt; \
+> fi
+
+# 2. export /opt/ohpc-aarch64/opt/ohpc from master server to docker container in case of CentOS 7.7 for OpenHPC 1.3.9
+[root@x86_64 cross-sms-aarch64.sh]# mkdir -p /opt/ohpc-aarch64/opt/ohpc
+[root@x86_64 cross-sms-aarch64.sh]# echo "/opt/ohpc-aarch64/opt/ohpc 172.17.0.0/16(rw,no_subtree_check,no_root_squash) ${sms_ip}/32(rw,no_subtree_check,no_root_squash)" >> /etc/exports
+[root@x86_64 cross-sms-aarch64.sh]# exportfs -ra
+
+# 3. create Docker NFS volume and local volume
+[root@x86_64 cross-sms-aarch64.sh]# docker volume create --driver local \
+  --opt type=nfs \
+  --opt o=addr=${sms_ip},rw,nfsvers=3 \
+  --opt device=:/opt/ohpc-aarch64/opt/ohpc ohpc-aarch64
+[root@x86_64 cross-sms-aarch64.sh]# docker volume create yum-aarch64
+[root@x86_64 cross-sms-aarch64.sh]# docker volume ls
+DRIVER              VOLUME NAME
+local               ohpc-aarch64
+local               yum-aarch64
+[root@x86_64 cross-sms-aarch64.sh]# mkdir -p /opt/ohpc-aarch64/var/chroots
+[root@x86_64 cross-sms-aarch64.sh]# tree /opt/ohpc-aarch64/
+/opt/ohpc-aarch64/
+├── opt
+│   └── ohpc
+└── var
+    └── chroots
+
+# 4. Install docker client shell
+[root@x86_64 cross-sms-aarch64.sh]# install -o root -g root sms-aarch64.sh /usr/local/bin
+```
