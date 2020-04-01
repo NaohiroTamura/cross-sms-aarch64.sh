@@ -167,11 +167,14 @@ Running: cleanup
 [root@aarch64 /]# exit
 ```
 
-The warewulf database is running on SMS x86_64, so you don't have to
-do anything to the container.
+The warewulf database is running on SMS x86_64, and all interactions
+with the database must occur on the parent x86_64 host.  The
+containerized aarch64 environment is now used to create a customized
+chrooted VNFS environment in a path that is accessible by the parent
+x86_64 host.
 
-Please notice that the path */var/chroots/images/centos7.7* in the
-container is equivalent to the path
+Please note that the path */var/chroots/images/centos7.7*
+in the container is equivalent to the path
 */opt/ohpc-aarch64/var/chroots/centos7.7* on SMS x86_64.
 
 The environment variable *AARCH64_CHROOT* is chosen to prevent us from
