@@ -91,8 +91,8 @@ build:
 	fi
 	if [ ! -e usr/bin/qemu-aarch64-static ]
 	then
-		wget http://security.ubuntu.com/ubuntu/pool/universe/q/qemu/qemu-user-static_3.1+dfsg-2ubuntu3.6_amd64.deb && \
-		( ar p qemu-user-static_3.1+dfsg-2ubuntu3.6_amd64.deb data.tar.xz | tar Jxvf - ./usr/bin/qemu-aarch64-static )
+		wget http://security.ubuntu.com/ubuntu/pool/universe/q/qemu/qemu-user-static_4.0+dfsg-0ubuntu9.4_amd64.deb && \
+		( ar p qemu-user-static_4.0+dfsg-0ubuntu9.4_amd64.deb data.tar.xz | tar Jxvf - ./usr/bin/qemu-aarch64-static )
 	fi
 	if [ ! -e usr/bin/qemu-aarch64-static ]
 	then
