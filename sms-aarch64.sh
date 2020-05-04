@@ -51,4 +51,4 @@ fi
 docker run -it --rm --hostname aarch64 \
        $volume_options \
        $proxy_options \
-       sms-aarch64.sh $@
+       sms-aarch64.sh:${docker_image_tag:=latest} $@
