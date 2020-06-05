@@ -32,7 +32,7 @@ endif
 
 HAVE_AR := $(shell which ar)
 ifndef HAVE_AR
-$(error ar is missing)
+$(error ar is missing, please install binutils package)
 endif
 
 HAVE_DOCKER := $(shell which docker)
