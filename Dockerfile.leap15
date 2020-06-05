@@ -28,7 +28,8 @@ RUN rpm -ivh http://repos.openhpc.community/OpenHPC/2/Leap_15/aarch64/ohpc-relea
 # ------------------------------------------------------------
 # Add baseline OpenHPC and provisioning services (Section 3.3)
 # ------------------------------------------------------------
-    zypper -n install ohpc-base ohpc-warewulf
+# --no-gpg-checks is work around for OHPC 2.0 RC1 Leap_15 repo
+    zypper -n --no-gpg-checks install ohpc-base ohpc-warewulf
 
 
 VOLUME ["/opt/ohpc", "/var/lib/zypp"]
