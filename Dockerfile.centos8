@@ -13,7 +13,7 @@
 # under the License.
 #
 
-FROM arm64v8/centos:8.1.1911
+FROM arm64v8/centos:8.2.2004
 
 ADD usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
 
