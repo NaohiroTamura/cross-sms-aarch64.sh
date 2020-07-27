@@ -51,7 +51,7 @@ endif
 endif
 
 # define variables
-QEMU_USER_STATIC_DEB_FILE := qemu-user-static_4.0+dfsg-0ubuntu9.7_amd64.deb
+QEMU_USER_STATIC_DEB_FILE := qemu-user-static_4.0+dfsg-0ubuntu9.8_amd64.deb
 
 QEMU_USER_STATIC_DEB_URL := http://security.ubuntu.com/ubuntu/pool/universe/q/qemu/$(QEMU_USER_STATIC_DEB_FILE)
 
