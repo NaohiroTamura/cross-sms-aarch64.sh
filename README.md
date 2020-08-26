@@ -28,7 +28,7 @@ install aarch64 OpenHPC Development Components into
 
 SMS x86_64 requires the following softwares have been installed.
 
-* [OpenHPC 1.3.9 (12 November 2019)][2] or [OpenHPC 2.0 (2020/1Q)][3]
+* [OpenHPC 1.3.9 (12 November 2019)][2] or [OpenHPC 2.0 (2020/2Q)][3]
 * Docker/Docker-ce 1.13.1 later, or Podman 1.7.0 later (1.6.4 doesn't support NFS volume)
 
 Type the following commands to verify the software versions:
