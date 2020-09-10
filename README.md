@@ -200,7 +200,7 @@ container.
 [root@x86_64 ~]# echo "/opt/ohpc-aarch64/opt/ohpc/pub *(ro,no_subtree_check,fsid=12)" >> /etc/exports
 [root@x86_64 ~]# exportfs -ra
 
-# Enable NTP time service on computes and identify master host as local NTP server (in case of CentOS7)
+# Enable NTP time service on computes and identify master host as local NTP server (in case of CentOS 7)
 [root@x86_64 ~]# chroot $AARCH64_CHROOT systemctl enable ntpd
 [root@x86_64 ~]# echo "server ${sms_ip}" >> $AARCH64_CHROOT/etc/ntp.conf
 
