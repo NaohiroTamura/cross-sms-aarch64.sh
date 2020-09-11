@@ -52,7 +52,8 @@ If you choose podman, please install podman-docker package or creat symlink to d
 
 
 [2]: https://github.com/openhpc/ohpc/releases/download/v1.3.9.GA/Install_guide-CentOS7-Warewulf-SLURM-1.3.9-x86_64.pdf "CentOS 7.7 x86_64 Install guide with Warewulf + Slurm"
-[3]: https://github.com/openhpc/ohpc/milestone/16 "OpenHPC 2.0 is not available as of March 20th 2020"
+[3]: https://github.com/openhpc/ohpc/releases/download/v2.0RC1/Install_guide-Centos8-Warewulf-SLURM-2.0RC1-x86_64.pdf "OpenHPC 2.0 is RC1 as of June 05th 2020"
+
 
 ## Build and Install
 
@@ -89,12 +90,16 @@ HTTPS_PROXY environment variables.
 Heading title hereinafter refers to the section of OpenHPC 1.3.9
 (12 November 2019) [CentOS 7.7 aarch64 Install guide with Warewulf +
 Slurm][4].
+It also matches section of OpenHPC 2.0 (2020 3Q) [CentOS 8.1 aarch64 
+install guide with Warewulf + Slurm][5].
 
 Please notice that the section number of [CentOS 7.7 aarch64 Install
-guide with Warewulf + Slurm][3] is slightly different from [CentOS
+guide with Warewulf + Slurm][4] is slightly different from [CentOS
 7.7 x86_64 Install guide with Warewulf + Slurm][2].
+The same applies to CentOS 8.1 Install guide.
 
 [4]: https://github.com/openhpc/ohpc/releases/download/v1.3.9.GA/Install_guide-CentOS7-Warewulf-SLURM-1.3.9-aarch64.pdf "CentOS 7.7 aarch64 Install guide with Warewulf + Slurm"
+[5]: https://github.com/openhpc/ohpc/releases/download/v2.0RC1/Install_guide-Centos8-Warewulf-SLURM-2.0RC1-x86_64.pdf "CentOS 8.1 aarch64 Install guide with Warewulf + Slurm"
 
 ### 3.1 Enable OpenHPC repository for local use
 
@@ -158,10 +163,13 @@ Running: cleanup
 + '[' -n '' ']'
 + return 0
 
+[root@aarch64 /]# yum -y --installroot $CHROOT install epel-release
+[root@aarch64 /]# cp -p /etc/yum.repos.d/OpenHPC*.repo $CHROOT/etc/yum.repos.d
 [root@aarch64 /]# yum -y --installroot=$CHROOT install ohpc-base-compute
 [root@aarch64 /]# cp -p /etc/resolv.conf $CHROOT/etc/resolv.conf
 [root@aarch64 /]# yum -y --installroot=$CHROOT install ohpc-slurm-client
-[root@aarch64 /]# yum -y --installroot=$CHROOT install ntp
+[root@aarch64 /]# yum -y --installroot=$CHROOT install ntp (in case of CentOS 7)
+[root@aarch64 /]# yum -y --installroot=$CHROOT install chrony (in case of CentOS 8)
 [root@aarch64 /]# yum -y --installroot=$CHROOT install kernel
 [root@aarch64 /]# yum -y --installroot=$CHROOT install lmod-ohpc
 [root@aarch64 /]# exit
@@ -192,9 +200,12 @@ container.
 [root@x86_64 ~]# echo "/opt/ohpc-aarch64/opt/ohpc/pub *(ro,no_subtree_check,fsid=12)" >> /etc/exports
 [root@x86_64 ~]# exportfs -ra
 
-# Enable NTP time service on computes and identify master host as local NTP server
+# Enable NTP time service on computes and identify master host as local NTP server (in case of CentOS 7)
 [root@x86_64 ~]# chroot $AARCH64_CHROOT systemctl enable ntpd
 [root@x86_64 ~]# echo "server ${sms_ip}" >> $AARCH64_CHROOT/etc/ntp.conf
+
+# Identify master host as local NTP server (in case of CentOS 8)
+[root@x86_64 ~]# echo "server ${sms_ip}" >> $AARCH64_CHROOT/etc/chrony.conf
 ```
 
 ### 3.7 Finalizing provisioning conﬁguration
