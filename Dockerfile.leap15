@@ -13,7 +13,7 @@
 # under the License.
 #
 
-FROM opensuse/leap@sha256:f7e0ee9ff8e7755dccccb1745122952ef71cf7d25ffc372383b4b01f1f31247c
+FROM opensuse/leap@sha256:7c313faa1a5f812cf905f2dc7b293ee09072b4b4ffa6297e93abbbb439a24671
 
 ADD usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
 
@@ -24,12 +24,12 @@ RUN zypper update -y && zypper -n install curl openssh which file iproute2 vim
 # Enable OpenHPC repository for local use (Section 3.1)
 # ------------------------------------------------------------
 RUN rpm -ivh http://repos.openhpc.community/OpenHPC/2/Leap_15/aarch64/ohpc-release-2-1.leap15.aarch64.rpm && \
-
+#
 # ------------------------------------------------------------
 # Add baseline OpenHPC and provisioning services (Section 3.3)
 # ------------------------------------------------------------
-# --no-gpg-checks is work around for OHPC 2.0 RC1 Leap_15 repo
-    zypper -n --no-gpg-checks install ohpc-base ohpc-warewulf
+    zypper -n --no-gpg-checks --gpg-auto-import-keys refresh && \
+    zypper -n install ohpc-base ohpc-warewulf
 
 
 VOLUME ["/opt/ohpc", "/var/lib/zypp"]

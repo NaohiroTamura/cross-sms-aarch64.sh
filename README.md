@@ -28,7 +28,7 @@ install aarch64 OpenHPC Development Components into
 
 SMS x86_64 requires the following softwares have been installed.
 
-* [OpenHPC 1.3.9 (12 November 2019)][2] or [OpenHPC 2.0 (2020/3Q)][3]
+* [OpenHPC 1.3.9 (12 November 2019)][2] or [OpenHPC 2.0 (6 October 2020)][3]
 * Docker/Docker-ce 1.13.1 later, or Podman 1.7.0 later (1.6.4 doesn't support NFS volume)
 
 Type the following commands to verify the software versions:
@@ -51,8 +51,8 @@ If you choose podman, please install podman-docker package or creat symlink to d
 ```
 
 
-[2]: https://github.com/openhpc/ohpc/releases/download/v1.3.9.GA/Install_guide-CentOS7-Warewulf-SLURM-1.3.9-x86_64.pdf "CentOS 7.7 x86_64 Install guide with Warewulf + Slurm"
-[3]: https://github.com/openhpc/ohpc/releases/download/v2.0RC1/Install_guide-Centos8-Warewulf-SLURM-2.0RC1-x86_64.pdf "OpenHPC 2.0 is RC1 as of June 05th 2020"
+[2]: https://github.com/openhpc/ohpc/releases/download/v1.3.9.GA/Install_guide-CentOS7-Warewulf-SLURM-1.3.9-x86_64.pdf "CentOS 7.7 x86_64 Install Guide (with Warewulf + Slurm)"
+[3]: https://github.com/openhpc/ohpc/releases/download/v2.0.GA/Install_guide-CentOS8-Warewulf-SLURM-2.0-x86_64.pdf "CentOS 8.2 x86_64 Install Guide (with Warewulf + Slurm)"
 
 
 ## Build and Install
@@ -89,17 +89,17 @@ HTTPS_PROXY environment variables.
 
 Heading title hereinafter refers to the section of OpenHPC 1.3.9
 (12 November 2019) [CentOS 7.7 aarch64 Install guide with Warewulf +
-Slurm][4].
-It also matches section of OpenHPC 2.0 (2020 3Q) [CentOS 8.1 aarch64 
+Slurm][4] and OpenHPC 2.0 (6 October 2020) [CentOS 8.2 aarch64
 install guide with Warewulf + Slurm][5].
 
-Please notice that the section number of [CentOS 7.7 aarch64 Install
-guide with Warewulf + Slurm][4] is slightly different from [CentOS
-7.7 x86_64 Install guide with Warewulf + Slurm][2].
-The same applies to CentOS 8.1 Install guide.
+Please notice that the section numbers of [CentOS 7.7 aarch64 Install
+Guide (with Warewulf + Slurm)][4] and [CentOS 8.2 aarch64 Install
+Guide (with Warewulf + Slurm)][5] are slightly different from [CentOS
+7.7 x86_64  Install Guide (with Warewulf + Slurm)][2] and [CentOS 8.2
+x86_64 Install Guide (with Warewulf + Slurm)][3].
 
-[4]: https://github.com/openhpc/ohpc/releases/download/v1.3.9.GA/Install_guide-CentOS7-Warewulf-SLURM-1.3.9-aarch64.pdf "CentOS 7.7 aarch64 Install guide with Warewulf + Slurm"
-[5]: https://github.com/openhpc/ohpc/releases/download/v2.0RC1/Install_guide-Centos8-Warewulf-SLURM-2.0RC1-x86_64.pdf "CentOS 8.1 aarch64 Install guide with Warewulf + Slurm"
+[4]: https://github.com/openhpc/ohpc/releases/download/v1.3.9.GA/Install_guide-CentOS7-Warewulf-SLURM-1.3.9-aarch64.pdf "CentOS 7.7 aarch64 Install Guide (with Warewulf + Slurm)"
+[5]: https://github.com/openhpc/ohpc/releases/download/v2.0.GA/Install_guide-CentOS8-Warewulf-SLURM-2.0-aarch64.pdf "CentOS 8.2 aarch64 Install Guide (with Warewulf + Slurm)"
 
 ### 3.1 Enable OpenHPC repository for local use
 
