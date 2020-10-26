@@ -72,8 +72,8 @@ HTTPS_PROXY environment variables.
 
 3. make depends on OS and OpenHPC version
 [root@x86_64 cross-sms-aarch64.sh]# make                  # CentOS 7.7 for OpenHPC 1.3.9
-[root@x86_64 cross-sms-aarch64.sh]# make base_os=centos8  # CentOS 8.1 for OpenHPC 2.0
-[root@x86_64 cross-sms-aarch64.sh]# make base_os=leap15   # Leap 15.1  for OpenHPC 2.0
+[root@x86_64 cross-sms-aarch64.sh]# make base_os=centos8  # CentOS 8.2 for OpenHPC 2.0
+[root@x86_64 cross-sms-aarch64.sh]# make base_os=leap15   # Leap 15.2  for OpenHPC 2.0
 
 4. install
 [root@x86_64 cross-sms-aarch64.sh]# make install sms_ip=XX.XX.XX.XX
