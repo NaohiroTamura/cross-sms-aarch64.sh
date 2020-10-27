@@ -154,7 +154,6 @@ The bootstrap image created on x86_64 have *ARCH* attribute
 
 [root@x86_64 ~]# export WW_CONF=/etc/warewulf/bootstrap.conf
 [root@x86_64 ~]# echo "drivers += updates/kernel/" >> $WW_CONF
-[root@x86_64 ~]# echo "drivers += overlay" >> $WW_CONF
 
 # check the kernel version of the aarch64 BOS image
 [root@x86_64 ~]# ls $AARCH64_CHROOT/boot/vmlinux*
@@ -186,22 +185,17 @@ different between x86_64 and aarch64.
 # copy munge.key
 [root@x86_64 ~]# cp -p /etc/munge/munge.key $AARCH64_CHROOT/etc/munge/
 
-[root@x86_64 ~]# sms-aarch64.sh
-
-[root@aarch64 /]# export CHROOT=/var/chroots/leap15.2
-
 # check uid/gid
-[root@aarch64 /]# chroot $CHROOT ls -l /etc/munge/munge.key
--r-------- 1 995 989 1024 Oct 13 03:15 /etc/munge/munge.key
+[root@x86_64 ~]# sms-aarch64.sh chroot /var/chroots/leap15.2 ls -l /etc/munge/munge.key
+-r-------- 1 995 989 1024 Oct 27 11:52 /etc/munge/munge.key
 
 # update uid/gid
-[root@aarch64 /]# chroot $CHROOT chown munge.munge /etc/munge/munge.key
+[root@x86_64 ~]# sms-aarch64.sh chroot /var/chroots/leap15.2 chown munge.munge /etc/munge/munge.key
 
 # confirm uid/gid
-[root@aarch64 /]# chroot $CHROOT ls -l /etc/munge/munge.key
--r-------- 1 munge munge 1024 Oct 13 03:15 /etc/munge/munge.key
+[root@x86_64 ~]# sms-aarch64.sh chroot /var/chroots/leap15.2 ls -l /etc/munge/munge.key
+-r-------- 1 munge munge 1024 Oct 27 11:52 /etc/munge/munge.key
 
-[root@aarch64 /]# exit
 ```
 
 The Virtual Node File System (VNFS) image created on x86_64 have
@@ -234,10 +228,11 @@ leap15.2-aarch64     272.2      aarch64    /opt/ohpc-aarch64/var/chroots/leap15.
 [root@x86_64 /]# wwsh node new ${c_name} --arch=aarch64 --ipaddr=${c_ip} --hwaddr=${c_mac} -D ${eth_provision}
 
 # Define provisioning image for hosts
-# Define provisioning image for hosts
 # !!!!! CAUTION !!!!!
 # Do NOT set passwd,group,munge.key into '--files' parameter because
 # munge uid/gid are different between x86_64 and aarch64
+# As a workaround, munge.key is copied into VNFS in the previous section.
+# In terms of password and group, cluster user's uid/gid can be copied into VNFS or distributed by scp or rsync.
 [root@x86_64 /]# wwsh provision set "${compute_regex}" --vnfs=centos7.7-aarch64 --bootstrap=4.14.0-115.10.1.el7a.aarch64 \
 --files=dynamic_hosts,shadow,network
 
