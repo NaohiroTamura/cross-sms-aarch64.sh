@@ -29,7 +29,7 @@ install aarch64 OpenHPC Development Components into
 SMS x86_64 requires the following softwares have been installed.
 
 * [OpenHPC 1.3.9 (12 November 2019)][2] or [OpenHPC 2.0 (6 October 2020)][3]
-* Docker/Docker-ce 1.13.1 later, or Podman 1.7.0 later (1.6.4 doesn't support NFS volume)
+* docker/docker-ce 1.13.1 later
 
 Type the following commands to verify the software versions:
 
@@ -39,20 +39,18 @@ ohpc-base-1.3.8-3.1.ohpc.1.3.8.x86_64
 
 [root@x86_64 ~]# docker -v
 Docker version 1.13.1, build cccb291/1.13.1
-
-[root@x86_64 ~]# podman -v
-podman version 1.7.0
 ```
-
-If you choose podman, please install podman-docker package or creat symlink to docker.
-
-```sh
-[root@x86_64 ~]# ln -s /usr/bin/podman /usr/bin/docker
-```
-
 
 [2]: https://github.com/openhpc/ohpc/releases/download/v1.3.9.GA/Install_guide-CentOS7-Warewulf-SLURM-1.3.9-x86_64.pdf "CentOS 7.7 x86_64 Install Guide (with Warewulf + Slurm)"
 [3]: https://github.com/openhpc/ohpc/releases/download/v2.0.GA/Install_guide-CentOS8-Warewulf-SLURM-2.0-x86_64.pdf "CentOS 8.2 x86_64 Install Guide (with Warewulf + Slurm)"
+
+
+Instead of docker, podman will be supported if [NFS volume issue][6]
+is fixed.
+As of Oct. 27 2020, both podman 1.6.2 on CentOS 8.2 and podman 2.0.6
+on OpenSUSE Leap 15.2 have the issue.
+
+[6]: https://github.com/containers/podman/issues/4304
 
 
 ## Build and Install
