@@ -75,26 +75,26 @@ Running: cleanup
 + '[' -n '' ']'
 + return 0
 
-[root@aarch64 /]# dnf -y --installroot $CHROOT install epel-release
+[root@aarch64 /]# yum -y --installroot $CHROOT install epel-release
 [root@aarch64 /]# cp -p /etc/yum.repos.d/OpenHPC*.repo $CHROOT/etc/yum.repos.d
 ```
 
 #### 3.6.2 Add OpenHPC components
 
 ```sh
-[root@aarch64 /]# dnf -y --installroot=$CHROOT install ohpc-base-compute
+[root@aarch64 /]# yum -y --installroot=$CHROOT install ohpc-base-compute
 [root@aarch64 /]# cp -p /etc/resolv.conf $CHROOT/etc/resolv.conf
 # !!!!! CAUTION !!!!!
 # Never copy credential files into $CHROOT because aarch64 munge uid/gid is different from x86_64's
 # DO NOT TYPE "cp /etc/passwd /etc/group $CHROOT/etc"
 # !!!!!!!!!!!!!!!!!!!
-[root@aarch64 /]# dnf -y --installroot=$CHROOT install ohpc-slurm-client
+[root@aarch64 /]# yum -y --installroot=$CHROOT install ohpc-slurm-client
 [root@aarch64 /]# chroot $CHROOT systemctl enable munge
 [root@aarch64 /]# echo SLURMD_OPTIONS="--conf-server ${sms_ip}" > $CHROOT/etc/sysconfig/slurmd
-[root@aarch64 /]# dnf -y --installroot=$CHROOT install chrony
+[root@aarch64 /]# yum -y --installroot=$CHROOT install chrony
 [root@aarch64 /]# echo "server ${sms_ip}" >> $CHROOT/etc/chrony.conf
-[root@aarch64 /]# dnf -y --installroot=$CHROOT install kernel
-[root@aarch64 /]# dnf -y --installroot=$CHROOT install lmod-ohpc
+[root@aarch64 /]# yum -y --installroot=$CHROOT install kernel
+[root@aarch64 /]# yum -y --installroot=$CHROOT install lmod-ohpc
 [root@aarch64 /]# exit
 ```
 
@@ -147,7 +147,7 @@ The bootstrap image created on x86_64 have *ARCH* attribute
 *x86_64*. So please update the ARCH attribute as follows.
 
 ```sh
-[root@x86_64 ~]# dnf install -y warewulf-provision-ohpc-initramfs-aarch64 warewulf-provision-ohpc-server-ipxe-aarch64
+[root@x86_64 ~]# yum install -y warewulf-provision-ohpc-initramfs-aarch64 warewulf-provision-ohpc-server-ipxe-aarch64
 
 [root@x86_64 ~]# export WW_CONF=/etc/warewulf/bootstrap.conf
 [root@x86_64 ~]# echo "drivers += updates/kernel/" >> $WW_CONF
@@ -251,44 +251,44 @@ Boot the CN aarch64 via IPMI as CN x86_64.
 shell as follows.
 
 ```sh
-[root@x86_64 ~]# sms-aarch64.sh dnf -y install ohpc-autotools
-[root@x86_64 ~]# sms-aarch64.sh dnf -y install EasyBuild-ohpc
-[root@x86_64 ~]# sms-aarch64.sh dnf -y install hwloc-ohpc
-[root@x86_64 ~]# sms-aarch64.sh dnf -y install spack-ohpc
-[root@x86_64 ~]# sms-aarch64.sh dnf -y install valgrind-ohpc
+[root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-autotools
+[root@x86_64 ~]# sms-aarch64.sh yum -y install EasyBuild-ohpc
+[root@x86_64 ~]# sms-aarch64.sh yum -y install hwloc-ohpc
+[root@x86_64 ~]# sms-aarch64.sh yum -y install spack-ohpc
+[root@x86_64 ~]# sms-aarch64.sh yum -y install valgrind-ohpc
 ```
 ### 4.2 Compilers
 
 ```sh
-[root@x86_64 ~]# sms-aarch64.sh dnf -y install gnu9-compilers-ohpc
+[root@x86_64 ~]# sms-aarch64.sh yum -y install gnu9-compilers-ohpc
 ```
 
 ### 4.3 MPI Stacks
 
 ```sh
-[root@x86_64 ~]# sms-aarch64.sh dnf -y install openmpi4-gnu9-ohpc mpich-ofi-gnu9-ohpc
+[root@x86_64 ~]# sms-aarch64.sh yum -y install openmpi4-gnu9-ohpc mpich-ofi-gnu9-ohpc
 ```
 
 ### 4.4 Performance Tools
 
 ```sh
-[root@x86_64 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-perf-tools
+[root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-perf-tools
 ```
 
 ### 4.5 Setup default development environment
 
 ```sh
-[root@x86_64 ~]# sms-aarch64.sh dnf -y install lmod-defaults-gnu9-openmpi4-ohpc
+[root@x86_64 ~]# sms-aarch64.sh yum -y install lmod-defaults-gnu9-openmpi4-ohpc
 ```
 
 ### 4.6 3rd Party Libraries and Tools
 
 ```sh
-[root@x86_64 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-serial-libs
-[root@x86_64 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-io-libs
-[root@x86_64 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-python-libs
-[root@x86_64 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-runtimes
+[root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-serial-libs
+[root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-io-libs
+[root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-python-libs
+[root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-runtimes
 
-[root@x86_64 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-mpich-parallel-libs
-[root@x86_64 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-openmpi3-parallel-libs
+[root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-mpich-parallel-libs
+[root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-openmpi3-parallel-libs
 ```

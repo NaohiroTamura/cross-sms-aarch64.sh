@@ -113,7 +113,7 @@ Docker version 19.03.13, build 4484c46d9d
 
 [root@sms-ohpc20-centos8 ~]# yum install dnf-plugins-core
 
-[root@sms-ohpc20-centos8 ~]# dnf config-manager --set-enabled PowerTools
+[root@sms-ohpc20-centos8 ~]# yum config-manager --set-enabled PowerTools
 ```
 
 ### 3.2 Installation template (x86_64)
@@ -215,7 +215,7 @@ Docker version 19.03.13, build 4484c46d9d
 
 [root@aarch64 /]# wwmkchroot -d centos-8 $CHROOT
 
-[root@aarch64 /]# dnf -y --installroot $CHROOT install epel-release
+[root@aarch64 /]# yum -y --installroot $CHROOT install epel-release
 
 [root@aarch64 /]# cp -p /etc/yum.repos.d/OpenHPC*.repo $CHROOT/etc/yum.repos.d
 ```
@@ -223,11 +223,11 @@ Docker version 19.03.13, build 4484c46d9d
 #### 3.8.2 Add OpenHPC components (x86_64), 3.6.2 Add OpenHPC components (aarch64)
 
 ```sh
-[root@aarch64 /]# dnf -y --installroot=$CHROOT install ohpc-base-compute
+[root@aarch64 /]# yum -y --installroot=$CHROOT install ohpc-base-compute
 
 [root@aarch64 /]# cp -p /etc/resolv.conf $CHROOT/etc/resolv.conf
 
-[root@aarch64 /]# dnf -y --installroot=$CHROOT install ohpc-slurm-client
+[root@aarch64 /]# yum -y --installroot=$CHROOT install ohpc-slurm-client
 
 [root@aarch64 /]# chroot $CHROOT systemctl enable munge
 
@@ -235,13 +235,13 @@ Docker version 19.03.13, build 4484c46d9d
 
 [root@aarch64 /]# echo SLURMD_OPTIONS="--conf-server ${sms_ip}" > $CHROOT/etc/sysconfig/slurmd
 
-[root@aarch64 /]# dnf -y --installroot=$CHROOT install chrony
+[root@aarch64 /]# yum -y --installroot=$CHROOT install chrony
 
 [root@aarch64 /]# echo "server ${sms_ip}" >> $CHROOT/etc/chrony.conf
 
-[root@aarch64 /]# dnf -y --installroot=$CHROOT install kernel
+[root@aarch64 /]# yum -y --installroot=$CHROOT install kernel
 
-[root@aarch64 /]# dnf -y --installroot=$CHROOT install lmod-ohpc
+[root@aarch64 /]# yum -y --installroot=$CHROOT install lmod-ohpc
 
 [root@aarch64 /]# exit
 ```
@@ -296,7 +296,7 @@ Docker version 19.03.13, build 4484c46d9d
 #### 3.9.1 Assemble bootstrap image (x86_64), 3.7.1 Assemble bootstrap image (aarch64)
 
 ```sh
-[root@sms-ohpc20-centos8 ~]# dnf install -y warewulf-provision-ohpc-initramfs-aarch64 warewulf-provision-ohpc-server-ipxe-aarch64
+[root@sms-ohpc20-centos8 ~]# yum install -y warewulf-provision-ohpc-initramfs-aarch64 warewulf-provision-ohpc-server-ipxe-aarch64
 
 [root@sms-ohpc20-centos8 ~]# export WW_CONF=/etc/warewulf/bootstrap.conf
 
@@ -417,46 +417,46 @@ centos8.2-aarch64    353.6      aarch64    /opt/ohpc-aarch64/var/chroots/centos8
 ### 4.1 Development Tools (aarch64)
 
 ```sh
-[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install ohpc-autotools
-[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install EasyBuild-ohpc
-[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install hwloc-ohpc
-[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install spack-ohpc
-[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install valgrind-ohpc
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh yum -y install ohpc-autotools
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh yum -y install EasyBuild-ohpc
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh yum -y install hwloc-ohpc
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh yum -y install spack-ohpc
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh yum -y install valgrind-ohpc
 ```
 ### 4.2 Compilers (aarch64)
 
 ```sh
-[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install gnu9-compilers-ohpc
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh yum -y install gnu9-compilers-ohpc
 ```
 
 ### 4.3 MPI Stacks (aarch64)
 
 ```sh
-[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install openmpi4-gnu9-ohpc mpich-ofi-gnu9-ohpc
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh yum -y install openmpi4-gnu9-ohpc mpich-ofi-gnu9-ohpc
 ```
 
 ### 4.4 Performance Tools (aarch64)
 
 ```sh
-[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-perf-tools
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-perf-tools
 ```
 
 ### 4.5 Setup default development environment (aarch64)
 
 ```sh
-[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install lmod-defaults-gnu9-openmpi4-ohpc
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh yum -y install lmod-defaults-gnu9-openmpi4-ohpc
 ```
 
 ### 4.6 3rd Party Libraries and Tools (aarch64)
 
 ```sh
-[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-serial-libs
-[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-io-libs
-[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-python-libs
-[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-runtimes
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-serial-libs
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-io-libs
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-python-libs
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-runtimes
 
-[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-mpich-parallel-libs
-[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-openmpi3-parallel-libs
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-mpich-parallel-libs
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-openmpi3-parallel-libs
 ```
 
 ----------------------------------------------------------------------
