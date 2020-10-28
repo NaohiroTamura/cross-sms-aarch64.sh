@@ -364,6 +364,101 @@ centos8.2-aarch64    353.6      aarch64    /opt/ohpc-aarch64/var/chroots/centos8
 [root@sms-ohpc20-centos8 ~]# wwsh pxe update
 ```
 
+## 4 Install OpenHPC Development Components (x86_64)
+
+### 4.1 Development Tools (x86_64)
+
+```sh
+[root@sms-ohpc20-centos8 ~]# yum -y install ohpc-autotools
+[root@sms-ohpc20-centos8 ~]# yum -y install EasyBuild-ohpc
+[root@sms-ohpc20-centos8 ~]# yum -y install hwloc-ohpc
+[root@sms-ohpc20-centos8 ~]# yum -y install spack-ohpc
+[root@sms-ohpc20-centos8 ~]# yum -y install valgrind-ohpc
+```
+
+### 4.2 Compilers (x86_64)
+
+```sh
+[root@sms-ohpc20-centos8 ~]# yum -y install gnu9-compilers-ohpc
+```
+
+### 4.3 MPI Stacks (x86_64)
+
+```sh
+[root@sms-ohpc20-centos8 ~]# yum -y install openmpi4-gnu9-ohpc mpich-ofi-gnu9-ohpc
+```
+
+### 4.4 Performance Tools (x86_64)
+
+```sh
+[root@sms-ohpc20-centos8 ~]# yum -y install ohpc-gnu9-perf-tools
+```
+
+### 4.5 Setup default development environment (x86_64)
+
+```sh
+[root@sms-ohpc20-centos8 ~]# yum -y install lmod-defaults-gnu9-openmpi4-ohpc
+```
+
+### 4.6 3rd Party Libraries and Tools  (x86_64)
+
+```sh
+[root@sms-ohpc20-centos8 ~]# yum -y install ohpc-gnu9-serial-libs
+[root@sms-ohpc20-centos8 ~]# yum -y install ohpc-gnu9-io-libs
+[root@sms-ohpc20-centos8 ~]# yum -y install ohpc-gnu9-python-libs
+[root@sms-ohpc20-centos8 ~]# yum -y install ohpc-gnu9-runtimes
+
+[root@sms-ohpc20-centos8 ~]# yum -y install ohpc-gnu9-mpich-parallel-libs
+[root@sms-ohpc20-centos8 ~]# yum -y install ohpc-gnu9-openmpi4-parallel-libs
+```
+
+## 4 Install OpenHPC Development Components (aarch64)
+
+### 4.1 Development Tools (aarch64)
+
+```sh
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install ohpc-autotools
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install EasyBuild-ohpc
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install hwloc-ohpc
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install spack-ohpc
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install valgrind-ohpc
+```
+### 4.2 Compilers (aarch64)
+
+```sh
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install gnu9-compilers-ohpc
+```
+
+### 4.3 MPI Stacks (aarch64)
+
+```sh
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install openmpi4-gnu9-ohpc mpich-ofi-gnu9-ohpc
+```
+
+### 4.4 Performance Tools (aarch64)
+
+```sh
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-perf-tools
+```
+
+### 4.5 Setup default development environment (aarch64)
+
+```sh
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install lmod-defaults-gnu9-openmpi4-ohpc
+```
+
+### 4.6 3rd Party Libraries and Tools (aarch64)
+
+```sh
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-serial-libs
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-io-libs
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-python-libs
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-runtimes
+
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-mpich-parallel-libs
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh dnf -y install ohpc-gnu9-openmpi3-parallel-libs
+```
+
 ----------------------------------------------------------------------
 
 ## Start AArch64 Compute Node
