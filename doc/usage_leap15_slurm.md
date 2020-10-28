@@ -1,4 +1,4 @@
-## Usage for OpenHPC 2.0 OpenSUSE Leap 15.2
+## Usage for OpenHPC 2.0 OpenSUSE Leap 15.2 (with Warewulf + Slurm)
 
 Heading title hereinafter refers to the section of OpenHPC 2.0 (6
 October 2020) [OpenSUSE Leap 15.2 aarch64 Install guide with

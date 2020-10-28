@@ -1,4 +1,4 @@
-## Usage for OpenHPC 1.3.9 CentOS 7.7
+## Usage for OpenHPC 1.3.9 CentOS 7.7 (with Warewulf + Slurm)
 
 Heading title hereinafter refers to the section of OpenHPC 1.3.9
 (12 November 2019) [CentOS 7.7 aarch64 Install guide with Warewulf +

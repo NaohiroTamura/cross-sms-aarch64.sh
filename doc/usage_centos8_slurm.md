@@ -1,4 +1,4 @@
-## Usage for OpenHPC 2.0 CentOS 8.2
+## Usage for OpenHPC 2.0 CentOS 8.2 (with Warewulf + Slurm)
 
 Heading title hereinafter refers OpenHPC 2.0 (6 October 2020) [CentOS
 8.2 aarch64 Install guide with Warewulf + Slurm][1].

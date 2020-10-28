@@ -28,7 +28,8 @@ install aarch64 OpenHPC Development Components into
 
 SMS x86_64 requires the following softwares have been installed.
 
-* [OpenHPC 1.3.9 (12 November 2019)][2] or [OpenHPC 2.0 (6 October 2020)][3]
+* [OpenHPC 1.3.9 with Warewulf + Slurm][2], [OpenHPC 2.0 with
+  Warewulf + Slurm][3], or [OpenHPC 2.0 with Warewulf + OpenPBS)][4]
 * docker/docker-ce 1.13.1 later
 
 Type the following commands to verify the software versions:
@@ -43,14 +44,14 @@ Docker version 1.13.1, build cccb291/1.13.1
 
 [2]: https://github.com/openhpc/ohpc/releases/download/v1.3.9.GA/Install_guide-CentOS7-Warewulf-SLURM-1.3.9-x86_64.pdf "CentOS 7.7 x86_64 Install Guide (with Warewulf + Slurm)"
 [3]: https://github.com/openhpc/ohpc/releases/download/v2.0.GA/Install_guide-CentOS8-Warewulf-SLURM-2.0-x86_64.pdf "CentOS 8.2 x86_64 Install Guide (with Warewulf + Slurm)"
+[4]: https://github.com/openhpc/ohpc/releases/download/v2.0.GA/Install_guide-CentOS8-Warewulf-OpenPBS-2.0-x86_64.pdf "CentOS 8.2 x86_64 Install Guide (with Warewulf + OpenPBS)"
 
-
-Instead of docker, podman will be supported if [NFS volume issue][4]
+Instead of docker, podman will be supported if [NFS volume issue][5]
 is fixed.
 As of Oct. 27 2020, both podman 1.6.2 on CentOS 8.2 and podman 2.0.6
 on OpenSUSE Leap 15.2 have the issue.
 
-[4]: https://github.com/containers/podman/issues/4304
+[5]: https://github.com/containers/podman/issues/4304
 
 
 ## Build and Install
@@ -87,14 +88,15 @@ HTTPS_PROXY environment variables.
    system
 
 
-- [OpenHPC 1.3.9 CentOS 7.7](doc/usage_centos7.md)
-- [OpenHPC 2.0 CentOS 8.2](doc/usage_centos8.md)
-- [OpenHPC 2.0 Leap 15.2](doc/usage_leap15.md)
+- [OpenHPC 1.3.9 CentOS 7.7 (with Warewulf + Slurm)](doc/usage_centos7_slurm.md)
+- [OpenHPC 2.0 CentOS 8.2 (with Warewulf + Slurm)](doc/usage_centos8_slurm.md)
+- [OpenHPC 2.0 CentOS 8.2 (with Warewulf + OpenPBS)](doc/usage_centos8_openpbs.md)
+- [OpenHPC 2.0 Leap 15.2 (with Warewulf + Slurm)](doc/usage_leap15_slurm.md)
 
 
 ## Examples on QEMU
 
-- [OpenHPC 2.0 CentOS 8.2](doc/example_qemu_centos8.md)
+- [OpenHPC 2.0 CentOS 8.2 (with Warewulf + Slurm)](doc/example_qemu_centos8_slurm.md)
 
 ## Tips
 

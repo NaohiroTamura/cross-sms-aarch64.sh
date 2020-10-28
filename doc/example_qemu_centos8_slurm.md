@@ -1,4 +1,4 @@
-# Example on QEMU for OpenHPC 2.0 CentOS 8.2
+# Example on QEMU for OpenHPC 2.0 CentOS 8.2 (with Warewulf + Slurm)
 
 ## 0. Preparation
 
