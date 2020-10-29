@@ -359,9 +359,53 @@ centos8.2-aarch64    353.6      aarch64    /opt/ohpc-aarch64/var/chroots/centos8
 
 [root@sms-ohpc20-centos8 ~]# wwsh -y provision set c1 --kargs="net.ifnames=0 biosdevname=0 console=ttyAMA0,115200 rd.debug"
 
+[root@sms-ohpc20-centos8 ~]# wwsh node new c2 --arch=aarch64 --ipaddr=10.124.196.62 --hwaddr=52:54:00:12:34:57 -D eth0
+
+[root@sms-ohpc20-centos8 ~]# wwsh -y provision set c2 --vnfs=centos8.2-aarch64 --bootstrap=4.18.0-193.19.1.el8_2.aarch64 --files=dynamic_hosts,shadow
+
+[root@sms-ohpc20-centos8 ~]# wwsh -y provision set c2 --kargs="net.ifnames=0 biosdevname=0 console=ttyAMA0,115200 rd.debug"
+
 [root@sms-ohpc20-centos8 ~]# systemctl restart dhcpd
 
 [root@sms-ohpc20-centos8 ~]# wwsh pxe update
+```
+
+#### 3.10 Boot compute nodesStart (x86_64), 3.8 Boot compute nodes (aarch64)
+
+
+```sh
+ubuntu@bionic:~$ ip a
+...
+3: br0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+    link/ether fe:2a:84:8c:ca:f3 brd ff:ff:ff:ff:ff:ff
+    inet 10.124.196.156/24 brd 10.124.196.255 scope global br0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::fc5f:5ff:fed2:b998/64 scope link
+       valid_lft forever preferred_lft forever
+...
+
+ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-aarch64 -m 8192 \
+-drive if=pflash,format=raw,readonly,file=/usr/share/edk2.git/aarch64/QEMU_EFI-pflash.raw \
+-drive if=pflash,format=raw,file=c1-pflash.raw \
+-netdev bridge,id=net0,br=br0 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:56 \
+-serial mon:stdio -vga std -nographic -machine virt,accel=tcg -cpu cortex-a72 -smp 4 \
+-device virtio-rng-pci
+
+ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-aarch64 -m 8192 \
+-drive if=pflash,format=raw,readonly,file=/usr/share/edk2.git/aarch64/QEMU_EFI-pflash.raw \
+-drive if=pflash,format=raw,file=c2-pflash.raw \
+-netdev bridge,id=net0,br=br0 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:57 \
+-serial mon:stdio -vga std -nographic -machine virt,accel=tcg -cpu cortex-a72 -smp 4 \
+-device virtio-rng-pci
+
+```
+
+```sh
+[root@sms-ohpc20-centos8 ~]# ln -s /root/.ssh/cluster /root/.ssh/id_rsa
+
+[root@sms-ohpc20-centos8 ~]# ln -s /root/.ssh/cluster.pub /root/.ssh/id_rsa.pub
+
+[root@sms-ohpc20-centos8 ~]# pdsh -w c[1-2] uptime
 ```
 
 ## 4 Install OpenHPC Development Components (x86_64)
@@ -456,42 +500,18 @@ centos8.2-aarch64    353.6      aarch64    /opt/ohpc-aarch64/var/chroots/centos8
 [root@sms-ohpc20-centos8 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-runtimes
 
 [root@sms-ohpc20-centos8 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-mpich-parallel-libs
-[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-openmpi3-parallel-libs
+[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-openmpi4-parallel-libs
 ```
 
-----------------------------------------------------------------------
-
-## Start AArch64 Compute Node
-
+## 5 Resource Manager Startup (x86_64)
 
 ```sh
-ubuntu@bionic:~$ ip a
-...
-3: br0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
-    link/ether fe:2a:84:8c:ca:f3 brd ff:ff:ff:ff:ff:ff
-    inet 10.124.196.156/24 brd 10.124.196.255 scope global br0
-       valid_lft forever preferred_lft forever
-    inet6 fe80::fc5f:5ff:fed2:b998/64 scope link
-       valid_lft forever preferred_lft forever
-...
+[root@sms-ohpc20-centos8 ~]# systemctl enable munge
+[root@sms-ohpc20-centos8 ~]# systemctl enable slurmctld
+[root@sms-ohpc20-centos8 ~]# systemctl start munge
+[root@sms-ohpc20-centos8 ~]# systemctl start slurmctld
 
-ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-aarch64 -m 8192 \
--drive if=pflash,format=raw,readonly,file=/usr/share/edk2.git/aarch64/QEMU_EFI-pflash.raw \
--drive if=pflash,format=raw,file=c1-pflash.raw \
--netdev bridge,id=net0,br=br0 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:56 \
--serial mon:stdio -vga std -nographic -machine virt,accel=tcg -cpu cortex-a72 -smp 4 \
--device virtio-rng-pci
+[root@sms-ohpc20-centos8 ~]# pdsh -w c[1-2] systemctl start munge
+[root@sms-ohpc20-centos8 ~]# pdsh -w c[1-2] systemctl start slurmd
 
-```
-
-
-## SMS x86_64 Operation
-
-```sh
-[root@sms-ohpc20-centos8 ~]# ln -s /root/.ssh/cluster /root/.ssh/id_rsa
-
-[root@sms-ohpc20-centos8 ~]# ln -s /root/.ssh/cluster.pub /root/.ssh/id_rsa.pub
-
-[root@sms-ohpc20-centos8 ~]# pdsh -w c1 uptime
-c1:  05:02:23 up 11 min,  1 user,  load average: 0.11, 0.56, 0.49
 ```

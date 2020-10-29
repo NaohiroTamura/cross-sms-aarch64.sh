@@ -290,5 +290,5 @@ shell as follows.
 [root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-runtimes
 
 [root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-mpich-parallel-libs
-[root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-openmpi3-parallel-libs
+[root@x86_64 ~]# sms-aarch64.sh yum -y install ohpc-gnu9-openmpi4-parallel-libs
 ```
