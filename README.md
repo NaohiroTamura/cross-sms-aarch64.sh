@@ -28,8 +28,9 @@ install aarch64 OpenHPC Development Components into
 
 SMS x86_64 requires the following softwares have been installed.
 
-* [OpenHPC 1.3.9 with Warewulf + Slurm][2], [OpenHPC 2.0 with
-  Warewulf + Slurm][3], or [OpenHPC 2.0 with Warewulf + OpenPBS)][4]
+* [OpenHPC 1.3.9 with Warewulf + Slurm][2]
+* [OpenHPC 2.0 with Warewulf + Slurm][3]
+* [OpenHPC 2.0 with Warewulf + OpenPBS][4]
 * docker/docker-ce 1.13.1 later
 
 Type the following commands to verify the software versions:
