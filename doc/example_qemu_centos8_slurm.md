@@ -87,7 +87,7 @@ Docker version 19.03.13, build 4484c46d9d
 ```sh
 [root@sms-ohpc20-centos8 ~]# sms_ip=10.124.196.100
 
-[root@sms-ohpc20-centos8 ~]# sms_name=sms
+[root@sms-ohpc20-centos8 ~]# sms_name=sms-ohpc20-centos8
 
 [root@sms-ohpc20-centos8 ~]# ntp_server=10.134.61.180
 
