@@ -325,21 +325,9 @@ BOOTSTRAP NAME            SIZE (M)      ARCH
 #### 3.9.2 Assemble Virtual Node File System (VNFS) image (x86_64), 3.7.2 Assemble Virtual Node File System (VNFS) image (aarch64)
 
 ```sh
-[root@sms-ohpc20-centos8 ~]# cp -p /etc/munge/munge.key $AARCH64_CHROOT/etc/munge/
-
-[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh chroot /var/chroots/centos8.2 ls -l /etc/munge/munge.key
--r-------- 1 995 989 1024 Oct 27 11:52 /etc/munge/munge.key
-
-[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh chroot /var/chroots/centos8.2 chown munge.munge /etc/munge/munge.key
-
-[root@sms-ohpc20-centos8 ~]# sms-aarch64.sh chroot /var/chroots/centos8.2 ls -l /etc/munge/munge.key
--r-------- 1 munge munge 1024 Oct 27 11:52 /etc/munge/munge.key
+[root@sms-ohpc20-centos8 ~]# chown -R munge.munge $AARCH64_CHROOT/etc/munge $AARCH64_CHROOT/var/lib/munge $AARCH64_CHROOT/var/log/munge $AARCH64_CHROOT/run/munge
 
 [root@sms-ohpc20-centos8 ~]# perl -pi -e "s/^hybridize \+= \/usr\/include/\#hybridize \+= \/usr\/include/" /etc/warewulf/vnfs.conf
-
-[root@sms-ohpc20-centos8 ~]# grep centos /etc/passwd >> $AARCH64_CHROOT/etc/passwd
-
-[root@sms-ohpc20-centos8 ~]# grep centos /etc/group >> $AARCH64_CHROOT/etc/group
 
 [root@sms-ohpc20-centos8 ~]# wwvnfs --chroot $AARCH64_CHROOT centos8.2-aarch64
 
@@ -359,13 +347,15 @@ centos8.2-aarch64    353.6      aarch64    /opt/ohpc-aarch64/var/chroots/centos8
 ```sh
 [root@sms-ohpc20-centos8 ~]# wwsh node new c1 --arch=aarch64 --ipaddr=10.124.196.61 --hwaddr=52:54:00:12:34:56 -D eth0
 
-[root@sms-ohpc20-centos8 ~]# wwsh -y provision set c1 --vnfs=centos8.2-aarch64 --bootstrap=4.18.0-193.19.1.el8_2.aarch64 --files=dynamic_hosts,shadow
+[root@sms-ohpc20-centos8 ~]# wwsh -y provision set c1 --vnfs=centos8.2-aarch64 --bootstrap=4.18.0-193.19.1.el8_2.aarch64 \
+--files=dynamic_hosts,passwd,group,shadow,munge.key
 
 [root@sms-ohpc20-centos8 ~]# wwsh -y provision set c1 --kargs="net.ifnames=0 biosdevname=0 console=ttyAMA0,115200 rd.debug"
 
 [root@sms-ohpc20-centos8 ~]# wwsh node new c2 --arch=aarch64 --ipaddr=10.124.196.62 --hwaddr=52:54:00:12:34:57 -D eth0
 
-[root@sms-ohpc20-centos8 ~]# wwsh -y provision set c2 --vnfs=centos8.2-aarch64 --bootstrap=4.18.0-193.19.1.el8_2.aarch64 --files=dynamic_hosts,shadow
+[root@sms-ohpc20-centos8 ~]# wwsh -y provision set c2 --vnfs=centos8.2-aarch64 --bootstrap=4.18.0-193.19.1.el8_2.aarch64 \
+--files=dynamic_hosts,passwd,group,shadow,munge.key
 
 [root@sms-ohpc20-centos8 ~]# wwsh -y provision set c2 --kargs="net.ifnames=0 biosdevname=0 console=ttyAMA0,115200 rd.debug"
 
@@ -524,11 +514,6 @@ ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-aarch64 -m 8192 \
 > NodeName=c[1-2] Sockets=1 CoresPerSocket=4 ThreadsPerCore=1 State=UNKNOWN
 > PartitionName=x86_64 Nodes=n[1-2] Default=YES MaxTime=24:00:00 State=UP
 > PartitionName=aarch64 Nodes=c[1-2] MaxTime=24:00:00 State=UP
-
-[root@sms-ohpc20-centos8 ~]# systemctl restart slurmctld.service
-
-[root@sms-ohpc20-centos8 ~]# rsync -av /etc/slurm/slurm.conf c1:/etc/slurm
-[root@sms-ohpc20-centos8 ~]# rsync -av /etc/slurm/slurm.conf c2:/etc/slurm
 ```
 
 ```sh
@@ -544,26 +529,34 @@ ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-aarch64 -m 8192 \
 
 ## 6 Run a Test Job (aarch64)
 
+```sh
+[root@sms-ohpc20-centos8 ~]# useradd -m test
+
+[root@sms-ohpc20-centos8 ~]# pdsh -w c[1-2] /warewulf/bin/wwgetfiles
+```
+
 ### 6.1 Interactive execution (aarch64)
 
 ```sh
-[root@sms-ohpc20-centos8 ~]# su - centos
+[root@sms-ohpc20-centos8 ~]# su - test
 
-[centos@sms-ohpc20-centos8 ~]$ ssh c1
+[test@sms-ohpc20-centos8 ~]$ ssh c1
 
-[centos@c1 ~]$ mkdir aarch64/
+[test@sms-ohpc20-centos8 ~]$ ssh c1
 
-[centos@c1 ~]$ cd aarch64/
+[test@c1 ~]$ mkdir aarch64/
 
-[centos@c1 aarch64]$ mpicc -O3 /opt/ohpc/pub/examples/mpi/hello.c
+[test@c1 ~]$ cd aarch64/
 
-[centos@c1 aarch64]$ exit
+[test@c1 aarch64]$ mpicc -O3 /opt/ohpc/pub/examples/mpi/hello.c
 
-[centos@sms-ohpc20-centos8 ~]$ cd aarch64
+[test@c1 aarch64]$ exit
 
-[centos@sms-ohpc20-centos8 aarch64]$ srun -n 8 -N 2 --partition=aarch64 --pty /bin/bash
+[test@sms-ohpc20-centos8 ~]$ cd aarch64
 
-[centos@c1 aarch64]$ prun ./a.out
+[test@sms-ohpc20-centos8 aarch64]$ srun -n 8 -N 2 --partition=aarch64 --pty /bin/bash
+
+[test@c1 aarch64]$ prun ./a.out
 [prun] Master compute host = c1
 [prun] Resource manager = slurm
 [prun] Launch cmd = mpirun ./a.out (family=openmpi4)
@@ -578,23 +571,23 @@ ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-aarch64 -m 8192 \
     --> Process #   5 of   8 is alive. -> c2
     --> Process #   6 of   8 is alive. -> c2
 
-[centos@c1 aarch64]$ exit
+[test@c1 aarch64]$ exit
 ```
 
 6.2 Batch execution (aarch64)
 
 ```
-[centos@sms-ohpc20-centos8 aarch64]$ cp /opt/ohpc/pub/examples/slurm/job.mpi .
+[test@sms-ohpc20-centos8 aarch64]$ cp /opt/ohpc/pub/examples/slurm/job.mpi .
 
-[centos@sms-ohpc20-centos8 aarch64]$ vi job.mpi
+[test@sms-ohpc20-centos8 aarch64]$ vi job.mpi
 
-[centos@sms-ohpc20-centos8 aarch64]$ diff /opt/ohpc/pub/examples/slurm/job.mpi job.mpi
+[test@sms-ohpc20-centos8 aarch64]$ diff /opt/ohpc/pub/examples/slurm/job.mpi job.mpi
 6c6
 < #SBATCH -n 16                 # Total number of mpi tasks requested
 ---
 > #SBATCH -n 8                  # Total number of mpi tasks requested
 
-[centos@sms-ohpc20-centos8 aarch64]$ cat job.mpi
+[test@sms-ohpc20-centos8 aarch64]$ cat job.mpi
 #!/bin/bash
 
 #SBATCH -J test               # Job name
@@ -607,20 +600,20 @@ ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-aarch64 -m 8192 \
 
 prun ./a.out
 
-[centos@sms-ohpc20-centos8 aarch64]$ sbatch --partition=aarch64 job.mpi
-Submitted batch job 8
+[test@sms-ohpc20-centos8 aarch64]$ sbatch --partition=aarch64 job.mpi
+Submitted batch job 11
 
-[centos@sms-ohpc20-centos8 aarch64]$ scontrol show job 8
-JobId=8 JobName=test
-   UserId=centos(1000) GroupId=centos(1000) MCS_label=N/A
+[test@sms-ohpc20-centos8 aarch64]$ scontrol show job 11
+JobId=11 JobName=test
+   UserId=test(1002) GroupId=test(1002) MCS_label=N/A
    Priority=4294901758 Nice=0 Account=(null) QOS=(null)
    JobState=COMPLETED Reason=None Dependency=(null)
    Requeue=1 Restarts=0 BatchFlag=1 Reboot=0 ExitCode=0:0
-   RunTime=00:00:20 TimeLimit=01:30:00 TimeMin=N/A
-   SubmitTime=2020-10-30T05:18:05 EligibleTime=2020-10-30T05:18:05
-   AccrueTime=2020-10-30T05:18:05
-   StartTime=2020-10-30T05:18:05 EndTime=2020-10-30T05:18:25 Deadline=N/A
-   SuspendTime=None SecsPreSuspend=0 LastSchedEval=2020-10-30T05:18:05
+   RunTime=00:00:16 TimeLimit=01:30:00 TimeMin=N/A
+   SubmitTime=2020-10-30T12:59:38 EligibleTime=2020-10-30T12:59:38
+   AccrueTime=2020-10-30T12:59:38
+   StartTime=2020-10-30T12:59:39 EndTime=2020-10-30T12:59:55 Deadline=N/A
+   SuspendTime=None SecsPreSuspend=0 LastSchedEval=2020-10-30T12:59:39
    Partition=aarch64 AllocNode:Sid=sms-ohpc20-centos8:204
    ReqNodeList=(null) ExcNodeList=(null)
    NodeList=c[1-2]
@@ -631,15 +624,15 @@ JobId=8 JobName=test
    MinCPUsNode=1 MinMemoryNode=0 MinTmpDiskNode=0
    Features=(null) DelayBoot=00:00:00
    OverSubscribe=OK Contiguous=0 Licenses=(null) Network=(null)
-   Command=/home/centos/aarch64/job.mpi
-   WorkDir=/home/centos/aarch64
-   StdErr=/home/centos/aarch64/job.8.out
+   Command=/home/test/aarch64/job.mpi
+   WorkDir=/home/test/aarch64
+   StdErr=/home/test/aarch64/job.11.out
    StdIn=/dev/null
-   StdOut=/home/centos/aarch64/job.8.out
+   StdOut=/home/test/aarch64/job.11.out
    Power=
    MailUser=(null) MailType=NONE
 
-[centos@sms-ohpc20-centos8 aarch64]$ cat job.8.out
+[test@sms-ohpc20-centos8 aarch64]$ cat job.11.out
 [prun] Master compute host = c1
 [prun] Resource manager = slurm
 [prun] Launch cmd = mpirun ./a.out (family=openmpi4)

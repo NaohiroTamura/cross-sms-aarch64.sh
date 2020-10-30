@@ -85,10 +85,6 @@ Running: cleanup
 ```sh
 [root@aarch64 /]# zypper -n --installroot=$CHROOT install ohpc-base-compute
 [root@aarch64 /]# cp -p /etc/resolv.conf $CHROOT/etc/resolv.conf
-# !!!!! CAUTION !!!!!
-# Never copy credential files into $CHROOT because aarch64 munge uid/gid is different from x86_64's
-# DO NOT TYPE "cp /etc/passwd /etc/group $CHROOT/etc"
-# !!!!!!!!!!!!!!!!!!!
 [root@aarch64 /]# zypper -n --installroot=$CHROOT install ohpc-slurm-client
 [root@aarch64 /]# chroot $CHROOT systemctl enable munge
 [root@aarch64 /]# echo SLURMD_OPTIONS="--conf-server ${sms_ip}" > $CHROOT/etc/sysconfig/slurmd
@@ -180,24 +176,26 @@ BOOTSTRAP NAME            SIZE (M)      ARCH
 
 #### 3.7.2 Assemble Virtual Node File System (VNFS) image
 
-Munge key needs special treatment as below, because munge uid/gid are
-different between x86_64 and aarch64.
+Munge key needs special treatment as below, because munge uid/gid is
+different between sms and compute node.
 
 ```sh
-# copy munge.key
-[root@x86_64 ~]# cp -p /etc/munge/munge.key $AARCH64_CHROOT/etc/munge/
+# check munge directory uid/gid
+[root@x86_64 ~]# ls -ld $AARCH64_CHROOT/etc/munge $AARCH64_CHROOT/var/lib/munge $AARCH64_CHROOT/var/log/munge $AARCH64_CHROOT/run/munge
+drwx------ 1 statd docker 18 Oct 25 13:15 /opt/ohpc-aarch64/var/chroots/leap15.2/etc/munge
+drwxr-xr-x 1 statd docker  0 Oct 25 12:05 /opt/ohpc-aarch64/var/chroots/leap15.2/run/munge
+drwx--x--x 1 statd docker  0 Apr  2  2020 /opt/ohpc-aarch64/var/chroots/leap15.2/var/lib/munge
+drwx------ 1 statd docker  0 Apr  2  2020 /opt/ohpc-aarch64/var/chroots/leap15.2/var/log/munge
 
-# check uid/gid
-[root@x86_64 ~]# sms-aarch64.sh chroot /var/chroots/leap15.2 ls -l /etc/munge/munge.key
--r-------- 1 995 989 1024 Oct 27 11:52 /etc/munge/munge.key
+# change munge directories' uid/gid
+[root@x86_64 ~]# chown -R munge.munge $AARCH64_CHROOT/etc/munge $AARCH64_CHROOT/var/lib/munge $AARCH64_CHROOT/var/log/munge $AARCH64_CHROOT/run/munge
 
-# update uid/gid
-[root@x86_64 ~]# sms-aarch64.sh chroot /var/chroots/leap15.2 chown munge.munge /etc/munge/munge.key
-
-# confirm uid/gid
-[root@x86_64 ~]# sms-aarch64.sh chroot /var/chroots/leap15.2 ls -l /etc/munge/munge.key
--r-------- 1 munge munge 1024 Oct 27 11:52 /etc/munge/munge.key
-
+# confirm directory uid/gid
+[root@x86_64 ~]# ls -ld $AARCH64_CHROOT/etc/munge $AARCH64_CHROOT/var/lib/munge $AARCH64_CHROOT/var/log/munge $AARCH64_CHROOT/run/munge
+drwx------ 1 munge munge 18 Oct 25 13:15 /opt/ohpc-aarch64/var/chroots/leap15.2/etc/munge
+drwxr-xr-x 1 munge munge  0 Oct 25 12:05 /opt/ohpc-aarch64/var/chroots/leap15.2/run/munge
+drwx--x--x 1 munge munge  0 Apr  2  2020 /opt/ohpc-aarch64/var/chroots/leap15.2/var/lib/munge
+drwx------ 1 munge munge  0 Apr  2  2020 /opt/ohpc-aarch64/var/chroots/leap15.2/var/log/munge
 ```
 
 The Virtual Node File System (VNFS) image created on x86_64 have
@@ -233,15 +231,10 @@ leap15.2-aarch64     272.2      aarch64    /opt/ohpc-aarch64/var/chroots/leap15.
 [root@x86_64 /]# wwsh node new ${c_name} --arch=aarch64 --ipaddr=${c_ip} --hwaddr=${c_mac} -D ${eth_provision}
 
 # Define provisioning image for hosts
-# !!!!! CAUTION !!!!!
-# Do NOT set passwd,group,munge.key into '--files' parameter because
-# munge uid/gid are different between x86_64 and aarch64
-# As a workaround, munge.key is copied into VNFS in the previous section.
-# In terms of password and group, cluster user's uid/gid can be copied into VNFS or distributed by scp or rsync.
 [root@x86_64 /]# wwsh provision set "${compute_regex}" --vnfs=centos7.7-aarch64 --bootstrap=4.14.0-115.10.1.el7a.aarch64 \
---files=dynamic_hosts,shadow,network
+--files=dynamic_hosts,passwd,group,shadow,munge.key,network
 
-# Define provisioning image for hosts
+# Define node kernel arguments to support SOL console
 [root@x86_64 /]# wwsh -y provision set ${c_name} --kargs="net.ifnames=0 biosdevname=0 console=ttyAMA0,115200 rd.debug"
 
 # Restart dhcp / update PXE

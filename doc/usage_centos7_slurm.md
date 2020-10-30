@@ -213,7 +213,7 @@ centos7.7-aarch64    277.7      aarch64    /opt/ohpc-aarch64/var/chroots/centos7
 [root@x86_64 /]# wwsh provision set "${compute_regex}" --vnfs=centos7.7-aarch64 --bootstrap=4.14.0-115.10.1.el7a.aarch64 \
 --files=dynamic_hosts,passwd,group,shadow,slurm.conf,munge.key,network
 
-# Define provisioning image for hosts
+# Define node kernel arguments to support SOL console
 [root@x86_64 /]# wwsh -y provision set ${c_name} --kargs="net.ifnames=0 biosdevname=0 console=ttyAMA0,115200 rd.debug"
 
 # Restart dhcp / update PXE
