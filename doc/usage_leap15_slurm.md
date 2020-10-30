@@ -98,6 +98,8 @@ Running: cleanup
 [root@aarch64 /]# zypper -n --installroot=$CHROOT install lmod-ohpc
 [root@aarch64 /]# chroot $CHROOT systemctl enable sshd.service
 [root@aarch64 /]# mv $CHROOT/etc/hostname $CHROOT/etc/hostname.orig
+# optional: in case of compile on Compute Node
+[root@aarch64 /]# zypper -n --installroot=$CHROOT install glibc-devel
 [root@aarch64 /]# exit
 ```
 
@@ -204,6 +206,9 @@ follows.
 
 
 ```sh
+# optional: in case of compile on Compute Node
+[root@x86_64 ~]# perl -pi -e "s/^hybridize \+= \/usr\/include/\#hybridize \+= \/usr\/include/" /etc/warewulf/vnfs.conf
+
 # Assemble Virtual Node File System (VNFS) image
 [root@x86_64 ~]# wwvnfs --chroot $AARCH64_CHROOT leap15.2-aarch64
 

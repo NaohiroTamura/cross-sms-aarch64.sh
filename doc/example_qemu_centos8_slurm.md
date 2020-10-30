@@ -243,6 +243,8 @@ Docker version 19.03.13, build 4484c46d9d
 
 [root@aarch64 /]# yum -y --installroot=$CHROOT install lmod-ohpc
 
+[root@aarch64 /]# yum -y --installroot=$CHROOT install glibc-headers glibc-devel
+
 [root@aarch64 /]# exit
 ```
 
@@ -332,6 +334,8 @@ BOOTSTRAP NAME            SIZE (M)      ARCH
 
 [root@sms-ohpc20-centos8 ~]# sms-aarch64.sh chroot /var/chroots/centos8.2 ls -l /etc/munge/munge.key
 -r-------- 1 munge munge 1024 Oct 27 11:52 /etc/munge/munge.key
+
+[root@sms-ohpc20-centos8 ~]# perl -pi -e "s/^hybridize \+= \/usr\/include/\#hybridize \+= \/usr\/include/" /etc/warewulf/vnfs.conf
 
 [root@sms-ohpc20-centos8 ~]# grep centos /etc/passwd >> $AARCH64_CHROOT/etc/passwd
 
@@ -506,6 +510,28 @@ ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-aarch64 -m 8192 \
 ## 5 Resource Manager Startup (x86_64)
 
 ```sh
+[root@sms-ohpc20-centos8 ~]# vi /etc/slurm/slurm.conf
+[root@sms-ohpc20-centos8 ~]# diff /etc/slurm/slurm.conf.ohpc /etc/slurm/slurm.conf
+12c12
+< ControlMachine=linux0
+---
+> ControlMachine=sms-ohpc20-centos8
+96,97c96,99
+< NodeName=c[1-4] Sockets=2 CoresPerSocket=8 ThreadsPerCore=2 State=UNKNOWN
+< PartitionName=normal Nodes=c[1-4] Default=YES MaxTime=24:00:00 State=UP Oversubscribe=EXCLUSIVE
+---
+> NodeName=n[1-2] Sockets=1 CoresPerSocket=4 ThreadsPerCore=1 State=UNKNOWN
+> NodeName=c[1-2] Sockets=1 CoresPerSocket=4 ThreadsPerCore=1 State=UNKNOWN
+> PartitionName=x86_64 Nodes=n[1-2] Default=YES MaxTime=24:00:00 State=UP
+> PartitionName=aarch64 Nodes=c[1-2] MaxTime=24:00:00 State=UP
+
+[root@sms-ohpc20-centos8 ~]# systemctl restart slurmctld.service
+
+[root@sms-ohpc20-centos8 ~]# rsync -av /etc/slurm/slurm.conf c1:/etc/slurm
+[root@sms-ohpc20-centos8 ~]# rsync -av /etc/slurm/slurm.conf c2:/etc/slurm
+```
+
+```sh
 [root@sms-ohpc20-centos8 ~]# systemctl enable munge
 [root@sms-ohpc20-centos8 ~]# systemctl enable slurmctld
 [root@sms-ohpc20-centos8 ~]# systemctl start munge
@@ -513,5 +539,119 @@ ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-aarch64 -m 8192 \
 
 [root@sms-ohpc20-centos8 ~]# pdsh -w c[1-2] systemctl start munge
 [root@sms-ohpc20-centos8 ~]# pdsh -w c[1-2] systemctl start slurmd
+
+```
+
+## 6 Run a Test Job (aarch64)
+
+### 6.1 Interactive execution (aarch64)
+
+```sh
+[root@sms-ohpc20-centos8 ~]# su - centos
+
+[centos@sms-ohpc20-centos8 ~]$ ssh c1
+
+[centos@c1 ~]$ mkdir aarch64/
+
+[centos@c1 ~]$ cd aarch64/
+
+[centos@c1 aarch64]$ mpicc -O3 /opt/ohpc/pub/examples/mpi/hello.c
+
+[centos@c1 aarch64]$ exit
+
+[centos@sms-ohpc20-centos8 ~]$ cd aarch64
+
+[centos@sms-ohpc20-centos8 aarch64]$ srun -n 8 -N 2 --partition=aarch64 --pty /bin/bash
+
+[centos@c1 aarch64]$ prun ./a.out
+[prun] Master compute host = c1
+[prun] Resource manager = slurm
+[prun] Launch cmd = mpirun ./a.out (family=openmpi4)
+
+    --> Process #   3 of   8 is alive. -> c1
+ Hello, world (8 procs total)
+    --> Process #   0 of   8 is alive. -> c1
+    --> Process #   1 of   8 is alive. -> c1
+    --> Process #   2 of   8 is alive. -> c1
+    --> Process #   4 of   8 is alive. -> c2
+    --> Process #   7 of   8 is alive. -> c2
+    --> Process #   5 of   8 is alive. -> c2
+    --> Process #   6 of   8 is alive. -> c2
+
+[centos@c1 aarch64]$ exit
+```
+
+6.2 Batch execution (aarch64)
+
+```
+[centos@sms-ohpc20-centos8 aarch64]$ cp /opt/ohpc/pub/examples/slurm/job.mpi .
+
+[centos@sms-ohpc20-centos8 aarch64]$ vi job.mpi
+
+[centos@sms-ohpc20-centos8 aarch64]$ diff /opt/ohpc/pub/examples/slurm/job.mpi job.mpi
+6c6
+< #SBATCH -n 16                 # Total number of mpi tasks requested
+---
+> #SBATCH -n 8                  # Total number of mpi tasks requested
+
+[centos@sms-ohpc20-centos8 aarch64]$ cat job.mpi
+#!/bin/bash
+
+#SBATCH -J test               # Job name
+#SBATCH -o job.%j.out         # Name of stdout output file (%j expands to jobId)
+#SBATCH -N 2                  # Total number of nodes requested
+#SBATCH -n 8                  # Total number of mpi tasks requested
+#SBATCH -t 01:30:00           # Run time (hh:mm:ss) - 1.5 hours
+
+# Launch MPI-based executable
+
+prun ./a.out
+
+[centos@sms-ohpc20-centos8 aarch64]$ sbatch --partition=aarch64 job.mpi
+Submitted batch job 8
+
+[centos@sms-ohpc20-centos8 aarch64]$ scontrol show job 8
+JobId=8 JobName=test
+   UserId=centos(1000) GroupId=centos(1000) MCS_label=N/A
+   Priority=4294901758 Nice=0 Account=(null) QOS=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Requeue=1 Restarts=0 BatchFlag=1 Reboot=0 ExitCode=0:0
+   RunTime=00:00:20 TimeLimit=01:30:00 TimeMin=N/A
+   SubmitTime=2020-10-30T05:18:05 EligibleTime=2020-10-30T05:18:05
+   AccrueTime=2020-10-30T05:18:05
+   StartTime=2020-10-30T05:18:05 EndTime=2020-10-30T05:18:25 Deadline=N/A
+   SuspendTime=None SecsPreSuspend=0 LastSchedEval=2020-10-30T05:18:05
+   Partition=aarch64 AllocNode:Sid=sms-ohpc20-centos8:204
+   ReqNodeList=(null) ExcNodeList=(null)
+   NodeList=c[1-2]
+   BatchHost=c1
+   NumNodes=2 NumCPUs=8 NumTasks=8 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   TRES=cpu=8,node=2,billing=8
+   Socks/Node=* NtasksPerN:B:S:C=0:0:*:* CoreSpec=*
+   MinCPUsNode=1 MinMemoryNode=0 MinTmpDiskNode=0
+   Features=(null) DelayBoot=00:00:00
+   OverSubscribe=OK Contiguous=0 Licenses=(null) Network=(null)
+   Command=/home/centos/aarch64/job.mpi
+   WorkDir=/home/centos/aarch64
+   StdErr=/home/centos/aarch64/job.8.out
+   StdIn=/dev/null
+   StdOut=/home/centos/aarch64/job.8.out
+   Power=
+   MailUser=(null) MailType=NONE
+
+[centos@sms-ohpc20-centos8 aarch64]$ cat job.8.out
+[prun] Master compute host = c1
+[prun] Resource manager = slurm
+[prun] Launch cmd = mpirun ./a.out (family=openmpi4)
+
+ Hello, world (8 procs total)
+    --> Process #   0 of   8 is alive. -> c1
+    --> Process #   2 of   8 is alive. -> c1
+    --> Process #   4 of   8 is alive. -> c2
+    --> Process #   6 of   8 is alive. -> c2
+    --> Process #   1 of   8 is alive. -> c1
+    --> Process #   5 of   8 is alive. -> c2
+    --> Process #   3 of   8 is alive. -> c1
+    --> Process #   7 of   8 is alive. -> c2
 
 ```

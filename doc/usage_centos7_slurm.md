@@ -90,6 +90,8 @@ Running: cleanup
 [root@aarch64 /]# yum -y --installroot=$CHROOT install ntp
 [root@aarch64 /]# yum -y --installroot=$CHROOT install kernel
 [root@aarch64 /]# yum -y --installroot=$CHROOT install lmod-ohpc
+# optional: in case of compile on Compute Node
+[root@aarch64 /]# yum -y --installroot=$CHROOT install glibc-headers glibc-devel
 [root@aarch64 /]# exit
 ```
 
@@ -181,6 +183,9 @@ The Virtual Node File System (VNFS) image created on x86_64 have
 follows.
 
 ```sh
+# optional: in case of compile on Compute Node
+[root@x86_64 ~]# perl -pi -e "s/^hybridize \+= \/usr\/include/\#hybridize \+= \/usr\/include/" /etc/warewulf/vnfs.conf
+
 # Assemble Virtual Node File System (VNFS) image
 [root@x86_64 ~]# wwvnfs --chroot $AARCH64_CHROOT centos7.7-aarch64
 
