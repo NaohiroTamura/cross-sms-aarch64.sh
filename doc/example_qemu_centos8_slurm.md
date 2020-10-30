@@ -16,12 +16,6 @@
 
 ```sh
 [root@sms-ohpc20-centos8 ~]# dnf -y install nfs-utils
-
-[root@sms-ohpc20-centos8 ~]# systemctl enable nfs-server
-
-[root@sms-ohpc20-centos8 ~]# systemctl start nfs-server
-
-[root@sms-ohpc20-centos8 ~]# systemctl status nfs-server
 ```
 
 ### 0.3 Bridge setup
@@ -192,7 +186,8 @@ Docker version 19.03.13, build 4484c46d9d
 
 ### 3.8 Deﬁne compute image for provisioning (x86_64), 3.6 Deﬁne compute image for provisioning (aarch64)
 
-#### 3.8.1 Build initial BOS image (x86_64), 3.6.1 Build initial BOS image (aarch64)
+
+#### 3.6.1 Build initial BOS image (aarch64)
 
 ```sh
 [root@sms-ohpc20-centos8 ~]# git clone https://github.com/NaohiroTamura/cross-sms-aarch64.sh
@@ -215,12 +210,12 @@ Docker version 19.03.13, build 4484c46d9d
 
 [root@aarch64 /]# wwmkchroot -d centos-8 $CHROOT
 
-[root@aarch64 /]# yum -y --installroot $CHROOT install epel-release
+[root@aarch64 /]# dnf -y --installroot $CHROOT install epel-release
 
 [root@aarch64 /]# cp -p /etc/yum.repos.d/OpenHPC*.repo $CHROOT/etc/yum.repos.d
 ```
 
-#### 3.8.2 Add OpenHPC components (x86_64), 3.6.2 Add OpenHPC components (aarch64)
+#### 3.6.2 Add OpenHPC components (aarch64)
 
 ```sh
 [root@aarch64 /]# yum -y --installroot=$CHROOT install ohpc-base-compute
@@ -248,18 +243,6 @@ Docker version 19.03.13, build 4484c46d9d
 [root@aarch64 /]# exit
 ```
 
-#### 3.8.3 Customize system conﬁguration (x86_64)
-
-```sh
-[root@sms-ohpc20-centos8 ~]# wwinit database
-
-[root@sms-ohpc20-centos8 ~]# wwinit ssh_keys
-
-[root@sms-ohpc20-centos8 ~]# echo "/home *(rw,no_subtree_check,fsid=10,no_root_squash)" >> /etc/exports
-
-[root@sms-ohpc20-centos8 ~]# echo "/opt/ohpc/pub *(ro,no_subtree_check,fsid=11)" >> /etc/exports
-```
-
 #### 3.6.3 Customize system conﬁguration (aarch64)
 
 ```sh
@@ -272,11 +255,72 @@ Docker version 19.03.13, build 4484c46d9d
 [root@sms-ohpc20-centos8 ~]# echo "${sms_ip}:/home /home nfs nfsvers=3,nodev,nosuid 0 0" >> $AARCH64_CHROOT/etc/fstab
 
 [root@sms-ohpc20-centos8 ~]# echo "${sms_ip}:/opt/ohpc-aarch64/opt/ohpc/pub /opt/ohpc/pub nfs nfsvers=3,nodev 0 0" >> $AARCH64_CHROOT/etc/fstab
+```
 
-
+```sh
 [root@sms-ohpc20-centos8 ~]# echo "/opt/ohpc-aarch64/opt/ohpc/pub *(ro,no_subtree_check,fsid=12)" >> /etc/exports
+```
+
+#### 3.8.1 Build initial BOS image (x86_64)
+
+```sh
+[root@sms-ohpc20-centos8 ~]# export X86_64_CHROOT=/opt/ohpc/admin/images/centos8.2
+
+[root@sms-ohpc20-centos8 ~]# mkdir -p $X86_64_CHROOT
+
+[root@sms-ohpc20-centos8 ~]# wwmkchroot -v centos-8 $X86_64_CHROOT
+
+[root@sms-ohpc20-centos8 ~]# dnf -y --installroot $X86_64_CHROOT install epel-release
+
+[root@sms-ohpc20-centos8 ~]# cp -p /etc/yum.repos.d/OpenHPC*.repo $X86_64_CHROOT/etc/yum.repos.d
+```
+
+#### 3.8.2 Add OpenHPC components (x86_64)
+
+```sh
+[root@sms-ohpc20-centos8 ~]# yum -y --installroot=$X86_64_CHROOT install ohpc-base-compute
+
+[root@sms-ohpc20-centos8 ~]# cp -p /etc/resolv.conf $X86_64_CHROOT/etc/resolv.conf
+
+[root@sms-ohpc20-centos8 ~]# yum -y --installroot=$X86_64_CHROOT install ohpc-slurm-client
+
+[root@sms-ohpc20-centos8 ~]# chroot $X86_64_CHROOT systemctl enable munge
+
+[root@sms-ohpc20-centos8 ~]# echo SLURMD_OPTIONS="--conf-server ${sms_ip}" > $X86_64_CHROOT/etc/sysconfig/slurmd
+
+[root@sms-ohpc20-centos8 ~]# yum -y --installroot=$X86_64_CHROOT install chrony
+
+[root@sms-ohpc20-centos8 ~]# echo "server ${sms_ip}" >> $X86_64_CHROOT/etc/chrony.conf
+
+[root@sms-ohpc20-centos8 ~]# yum -y --installroot=$X86_64_CHROOT install kernel
+
+[root@sms-ohpc20-centos8 ~]# yum -y --installroot=$X86_64_CHROOT install lmod-ohpc
+
+[root@sms-ohpc20-centos8 ~]# yum -y --installroot=$X86_64_CHROOT install glibc-headers glibc-devel
+```
+
+#### 3.8.3 Customize system conﬁguration (x86_64)
+
+```sh
+[root@sms-ohpc20-centos8 ~]# wwinit database
+
+[root@sms-ohpc20-centos8 ~]# wwinit ssh_keys
+
+[root@sms-ohpc20-centos8 ~]# echo "${sms_ip}:/home /home nfs nfsvers=3,nodev,nosuid 0 0" >> $X86_64_CHROOT/etc/fstab
+
+[root@sms-ohpc20-centos8 ~]# echo "${sms_ip}:/opt/ohpc/pub /opt/ohpc/pub nfs nfsvers=3,nodev 0 0" >> $X86_64_CHROOT/etc/fstab
+```
+
+```sh
+[root@sms-ohpc20-centos8 ~]# echo "/home *(rw,no_subtree_check,fsid=10,no_root_squash)" >> /etc/exports
+
+[root@sms-ohpc20-centos8 ~]# echo "/opt/ohpc/pub *(ro,no_subtree_check,fsid=11)" >> /etc/exports
 
 [root@sms-ohpc20-centos8 ~]# exportfs -ra
+
+[root@sms-ohpc20-centos8 ~]# systemctl restart nfs-server
+
+[root@sms-ohpc20-centos8 ~]# systemctl enable nfs-server
 ```
 
 #### 3.8.4 Additional Customization (optional) (x86_64)
@@ -295,7 +339,7 @@ Docker version 19.03.13, build 4484c46d9d
 
 ### 3.9 Finalizing provisioning conﬁguration (x86_64), 3.7 Finalizing provisioning conﬁguration (aarch64)
 
-#### 3.9.1 Assemble bootstrap image (x86_64), 3.7.1 Assemble bootstrap image (aarch64)
+#### 3.7.1 Assemble bootstrap image (aarch64)
 
 ```sh
 [root@sms-ohpc20-centos8 ~]# yum install -y warewulf-provision-ohpc-initramfs-aarch64 warewulf-provision-ohpc-server-ipxe-aarch64
@@ -305,7 +349,9 @@ Docker version 19.03.13, build 4484c46d9d
 [root@sms-ohpc20-centos8 ~]# echo "drivers += updates/kernel/" >> $WW_CONF
 
 [root@sms-ohpc20-centos8 ~]# echo "modprobe += virtio, virtio_ring, virtio_blk, virtio_net, virtio_pci" >> $WW_CONF
+```
 
+```sh
 [root@sms-ohpc20-centos8 ~]# ls $AARCH64_CHROOT/boot/vmlinuz*
 /opt/ohpc-aarch64/var/chroots/centos8.2/boot/vmlinuz-4.18.0-193.19.1.el8_2.aarch64
 
@@ -322,7 +368,7 @@ BOOTSTRAP NAME            SIZE (M)      ARCH
 4.18.0-193.19.1.el8_2.aarch64 38.7          aarch64
 ```
 
-#### 3.9.2 Assemble Virtual Node File System (VNFS) image (x86_64), 3.7.2 Assemble Virtual Node File System (VNFS) image (aarch64)
+#### 3.7.2 Assemble Virtual Node File System (VNFS) image (aarch64)
 
 ```sh
 [root@sms-ohpc20-centos8 ~]# chown -R munge.munge $AARCH64_CHROOT/etc/munge $AARCH64_CHROOT/var/lib/munge $AARCH64_CHROOT/var/log/munge $AARCH64_CHROOT/run/munge
@@ -333,39 +379,99 @@ BOOTSTRAP NAME            SIZE (M)      ARCH
 
 [root@sms-ohpc20-centos8 ~]# wwsh vnfs list
 VNFS NAME            SIZE (M)   ARCH       CHROOT LOCATION
-centos8.2-aarch64    353.6      x86_64     /opt/ohpc-aarch64/var/chroots/centos8.2
+centos8.2-aarch64    359.3      x86_64     /opt/ohpc-aarch64/var/chroots/centos8.2
 
 [root@sms-ohpc20-centos8 ~]# wwsh vnfs set -y centos8.2-aarch64 -a aarch64
 
 [root@sms-ohpc20-centos8 ~]# wwsh vnfs list
 VNFS NAME            SIZE (M)   ARCH       CHROOT LOCATION
-centos8.2-aarch64    353.6      aarch64    /opt/ohpc-aarch64/var/chroots/centos8.2
+centos8.2-aarch64    359.3      aarch64    /opt/ohpc-aarch64/var/chroots/centos8.2
 ```
 
-#### 3.9.3 Register nodes for provisioning (x86_64), 3.7.3 Register nodes for provisioning (aarch64)
+#### 3.7.3 Register nodes for provisioning (aarch64)
 
 ```sh
-[root@sms-ohpc20-centos8 ~]# wwsh node new c1 --arch=aarch64 --ipaddr=10.124.196.61 --hwaddr=52:54:00:12:34:56 -D eth0
+[root@sms-ohpc20-centos8 ~]# wwsh -y node new c1 --arch=aarch64 --ipaddr=10.124.196.61 --hwaddr=52:54:00:12:34:56 -D eth0
 
 [root@sms-ohpc20-centos8 ~]# wwsh -y provision set c1 --vnfs=centos8.2-aarch64 --bootstrap=4.18.0-193.19.1.el8_2.aarch64 \
 --files=dynamic_hosts,passwd,group,shadow,munge.key
 
 [root@sms-ohpc20-centos8 ~]# wwsh -y provision set c1 --kargs="net.ifnames=0 biosdevname=0 console=ttyAMA0,115200 rd.debug"
 
-[root@sms-ohpc20-centos8 ~]# wwsh node new c2 --arch=aarch64 --ipaddr=10.124.196.62 --hwaddr=52:54:00:12:34:57 -D eth0
+[root@sms-ohpc20-centos8 ~]# wwsh -y node new c2 --arch=aarch64 --ipaddr=10.124.196.62 --hwaddr=52:54:00:12:34:57 -D eth0
 
 [root@sms-ohpc20-centos8 ~]# wwsh -y provision set c2 --vnfs=centos8.2-aarch64 --bootstrap=4.18.0-193.19.1.el8_2.aarch64 \
 --files=dynamic_hosts,passwd,group,shadow,munge.key
 
 [root@sms-ohpc20-centos8 ~]# wwsh -y provision set c2 --kargs="net.ifnames=0 biosdevname=0 console=ttyAMA0,115200 rd.debug"
 
+[root@sms-ohpc20-centos8 ~]# wwsh node list
+NAME                GROUPS              IPADDR              HWADDR
+================================================================================
+c1                  UNDEF               10.124.196.61       52:54:00:12:34:56
+c2                  UNDEF               10.124.196.62       52:54:00:12:34:57
+```
+
+#### 3.9.1 Assemble bootstrap image (x86_64)
+
+```sh
+[root@sms-ohpc20-centos8 ~]# ls $X86_64_CHROOT/boot/vmlinuz*
+/opt/ohpc/admin/images/centos8.2/boot/vmlinuz-4.18.0-193.19.1.el8_2.x86_64
+
+[root@sms-ohpc20-centos8 ~]# wwbootstrap --chroot $X86_64_CHROOT 4.18.0-193.19.1.el8_2.x86_64
+
+[root@sms-ohpc20-centos8 ~]# wwsh bootstrap list
+BOOTSTRAP NAME            SIZE (M)      ARCH
+4.18.0-193.19.1.el8_2.aarch64 38.7          aarch64
+4.18.0-193.19.1.el8_2.x86_64 42.6          x86_64
+```
+
+#### 3.9.2 Assemble Virtual Node File System (VNFS) image (x86_64)
+
+```sh
+[root@sms-ohpc20-centos8 ~]# chown -R munge.munge $X86_64_CHROOT/etc/munge $X86_64_CHROOT/var/lib/munge $X86_64_CHROOT/var/log/munge $X86_64_CHROOT/run/munge
+
+[root@sms-ohpc20-centos8 ~]# wwvnfs --chroot $X86_64_CHROOT centos8.2-x86_64
+
+[root@sms-ohpc20-centos8 ~]# wwsh vnfs list
+VNFS NAME            SIZE (M)   ARCH       CHROOT LOCATION
+centos8.2-aarch64    359.3      aarch64    /opt/ohpc-aarch64/var/chroots/centos8.2
+centos8.2-x86_64     374.9      x86_64     /opt/ohpc/admin/images/centos8.2
+```
+
+#### 3.9.3 Register nodes for provisioning (x86_64)
+
+```sh
+[root@sms-ohpc20-centos8 ~]# wwsh -y node new n1 --arch=x86_64 --ipaddr=10.124.196.71 --hwaddr=52:54:00:12:34:66 -D eth0
+
+[root@sms-ohpc20-centos8 ~]# wwsh -y provision set n1 --vnfs=centos8.2-x86_64 --bootstrap=4.18.0-193.19.1.el8_2.x86_64 \
+--files=dynamic_hosts,passwd,group,shadow,munge.key
+
+[root@sms-ohpc20-centos8 ~]# wwsh -y provision set n1 --kargs="net.ifnames=0 biosdevname=0 console=ttyS0,115200 rd.debug"
+
+[root@sms-ohpc20-centos8 ~]# wwsh -y node new n2 --arch=x86_64 --ipaddr=10.124.196.72 --hwaddr=52:54:00:12:34:67 -D eth0
+
+[root@sms-ohpc20-centos8 ~]# wwsh -y provision set n2 --vnfs=centos8.2-x86_64 --bootstrap=4.18.0-193.19.1.el8_2.x86_64 \
+--files=dynamic_hosts,passwd,group,shadow,munge.key
+
+[root@sms-ohpc20-centos8 ~]# wwsh -y provision set n2 --kargs="net.ifnames=0 biosdevname=0 console=ttyS0,115200 rd.debug"
+
+[root@sms-ohpc20-centos8 ~]# wwsh node list
+NAME                GROUPS              IPADDR              HWADDR
+================================================================================
+c1                  UNDEF               10.124.196.61       52:54:00:12:34:56
+c2                  UNDEF               10.124.196.62       52:54:00:12:34:57
+n1                  UNDEF               10.124.196.71       52:54:00:12:34:66
+n2                  UNDEF               10.124.196.72       52:54:00:12:34:67
+```
+
+```sh
 [root@sms-ohpc20-centos8 ~]# systemctl restart dhcpd
 
 [root@sms-ohpc20-centos8 ~]# wwsh pxe update
 ```
 
-#### 3.10 Boot compute nodesStart (x86_64), 3.8 Boot compute nodes (aarch64)
-
+#### 3.8 Boot compute nodes (aarch64)
 
 ```sh
 ubuntu@bionic:~$ ip a
@@ -377,19 +483,45 @@ ubuntu@bionic:~$ ip a
     inet6 fe80::fc5f:5ff:fed2:b998/64 scope link
        valid_lft forever preferred_lft forever
 ...
+```
+
+```sh
+ubuntu@bionic:~$ cp /usr/share/edk2.git/aarch64/vars-template-pflash.raw c1-pflash.raw
+ubuntu@bionic:~$ cp /usr/share/edk2.git/aarch64/vars-template-pflash.raw c2-pflash.raw
 
 ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-aarch64 -m 8192 \
 -drive if=pflash,format=raw,readonly,file=/usr/share/edk2.git/aarch64/QEMU_EFI-pflash.raw \
 -drive if=pflash,format=raw,file=c1-pflash.raw \
 -netdev bridge,id=net0,br=br0 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:56 \
--serial mon:stdio -vga std -nographic -machine virt,accel=tcg -cpu cortex-a72 -smp 4 \
+-serial mon:stdio -nographic -machine virt,accel=tcg -cpu cortex-a72 -smp 4 \
 -device virtio-rng-pci
 
 ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-aarch64 -m 8192 \
 -drive if=pflash,format=raw,readonly,file=/usr/share/edk2.git/aarch64/QEMU_EFI-pflash.raw \
 -drive if=pflash,format=raw,file=c2-pflash.raw \
 -netdev bridge,id=net0,br=br0 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:57 \
--serial mon:stdio -vga std -nographic -machine virt,accel=tcg -cpu cortex-a72 -smp 4 \
+-serial mon:stdio -nographic -machine virt,accel=tcg -cpu cortex-a72 -smp 4 \
+-device virtio-rng-pci
+```
+
+#### 3.10 Boot compute nodesStart (x86_64)
+
+```sh
+ubuntu@bionic:~$ cp /usr/share/edk2.git/ovmf-x64/OVMF_VARS-pure-efi.fd n1-pure-efi.fd
+ubuntu@bionic:~$ cp /usr/share/edk2.git/ovmf-x64/OVMF_VARS-pure-efi.fd n2-pure-efi.fd
+
+ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-x86_64 -m 8192 \
+-drive if=pflash,format=raw,readonly,file=/usr/share/edk2.git/ovmf-x64/OVMF_CODE-pure-efi.fd \
+-drive if=pflash,format=raw,file=n1-pure-efi.fd \
+-netdev bridge,id=net0,br=br0 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:66 \
+-serial mon:stdio -nographic -machine q35,accel=tcg -smp 4 \
+-device virtio-rng-pci
+
+ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-x86_64 -m 8192 \
+-drive if=pflash,format=raw,readonly,file=/usr/share/edk2.git/ovmf-x64/OVMF_CODE-pure-efi.fd \
+-drive if=pflash,format=raw,file=n2-pure-efi.fd \
+-netdev bridge,id=net0,br=br0 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:67 \
+-serial mon:stdio -nographic -machine q35,accel=tcg -smp 4 \
 -device virtio-rng-pci
 
 ```
@@ -399,8 +531,13 @@ ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-aarch64 -m 8192 \
 
 [root@sms-ohpc20-centos8 ~]# ln -s /root/.ssh/cluster.pub /root/.ssh/id_rsa.pub
 
-[root@sms-ohpc20-centos8 ~]# pdsh -w c[1-2] uptime
+[root@sms-ohpc20-centos8 ~]# pdsh -w c[1-2],n[1-2] uptime
+n1:  05:18:12 up 15 min,  1 user,  load average: 0.08, 0.02, 0.03
+n2:  05:18:13 up 9 min,  1 user,  load average: 0.09, 0.02, 0.08
+c2:  05:18:14 up 27 min,  1 user,  load average: 0.31, 0.87, 0.54
+c1:  05:18:15 up 34 min,  1 user,  load average: 0.27, 0.32, 0.38
 ```
+
 
 ## 4 Install OpenHPC Development Components (x86_64)
 
@@ -522,17 +659,17 @@ ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-aarch64 -m 8192 \
 [root@sms-ohpc20-centos8 ~]# systemctl start munge
 [root@sms-ohpc20-centos8 ~]# systemctl start slurmctld
 
-[root@sms-ohpc20-centos8 ~]# pdsh -w c[1-2] systemctl start munge
-[root@sms-ohpc20-centos8 ~]# pdsh -w c[1-2] systemctl start slurmd
+[root@sms-ohpc20-centos8 ~]# pdsh -w c[1-2],n[1-2] systemctl start munge
+[root@sms-ohpc20-centos8 ~]# pdsh -w c[1-2],n[1-2] systemctl start slurmd
 
 ```
 
-## 6 Run a Test Job (aarch64)
+## 7 Run a Test Job (x86_64), 6 Run a Test Job (aarch64)
 
 ```sh
 [root@sms-ohpc20-centos8 ~]# useradd -m test
 
-[root@sms-ohpc20-centos8 ~]# pdsh -w c[1-2] /warewulf/bin/wwgetfiles
+[root@sms-ohpc20-centos8 ~]# pdsh -w c[1-2],n[1-2] /warewulf/bin/wwgetfiles
 ```
 
 ### 6.1 Interactive execution (aarch64)
@@ -553,6 +690,11 @@ ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-aarch64 -m 8192 \
 [test@c1 aarch64]$ exit
 
 [test@sms-ohpc20-centos8 ~]$ cd aarch64
+
+[test@sms-ohpc20-centos8 aarch64]$ sinfo
+PARTITION AVAIL  TIMELIMIT  NODES  STATE NODELIST
+x86_64*      up 1-00:00:00      2   idle n[1-2]
+aarch64      up 1-00:00:00      2   idle c[1-2]
 
 [test@sms-ohpc20-centos8 aarch64]$ srun -n 8 -N 2 --partition=aarch64 --pty /bin/bash
 
@@ -647,4 +789,111 @@ JobId=11 JobName=test
     --> Process #   3 of   8 is alive. -> c1
     --> Process #   7 of   8 is alive. -> c2
 
+```
+
+### 7.1 Interactive execution (x86_64)
+
+```sh
+[root@sms-ohpc20-centos8 ~]# su - test
+
+[test@sms-ohpc20-centos8 ~]$ mkdir x86_64
+
+[test@sms-ohpc20-centos8 ~]$ cd x86_64
+
+[test@sms-ohpc20-centos8 x86_64]$ mpicc -O3 /opt/ohpc/pub/examples/mpi/hello.c
+
+[test@sms-ohpc20-centos8 x86_64]$ sinfo
+PARTITION AVAIL  TIMELIMIT  NODES  STATE NODELIST
+x86_64*      up 1-00:00:00      2   idle n[1-2]
+aarch64      up 1-00:00:00      2   idle c[1-2]
+
+[test@sms-ohpc20-centos8 x86_64]$ srun -n 8 -N 2 --pty /bin/bash
+[test@n1 x86_64]$ prun ./a.out
+[prun] Master compute host = n1
+[prun] Resource manager = slurm
+[prun] Launch cmd = mpirun ./a.out (family=openmpi4)
+
+ Hello, world (8 procs total)
+    --> Process #   0 of   8 is alive. -> n1
+    --> Process #   2 of   8 is alive. -> n1
+    --> Process #   3 of   8 is alive. -> n1
+    --> Process #   1 of   8 is alive. -> n1
+    --> Process #   4 of   8 is alive. -> n2
+    --> Process #   5 of   8 is alive. -> n2
+    --> Process #   6 of   8 is alive. -> n2
+    --> Process #   7 of   8 is alive. -> n2
+```
+
+### 7.2 Batch execution (x86_64)
+
+```sh
+[test@sms-ohpc20-centos8 x86_64]$ cp /opt/ohpc/pub/examples/slurm/job.mpi .
+
+[test@sms-ohpc20-centos8 x86_64]$ vi job.mpi
+
+[test@sms-ohpc20-centos8 x86_64]$ diff /opt/ohpc/pub/examples/slurm/job.mpi job.mpi
+6c6
+< #SBATCH -n 16                 # Total number of mpi tasks requested
+---
+> #SBATCH -n 8                  # Total number of mpi tasks requested
+
+[test@sms-ohpc20-centos8 x86_64]$ cat job.mpi
+#!/bin/bash
+
+#SBATCH -J test               # Job name
+#SBATCH -o job.%j.out         # Name of stdout output file (%j expands to jobId)
+#SBATCH -N 2                  # Total number of nodes requested
+#SBATCH -n 8                  # Total number of mpi tasks requested
+#SBATCH -t 01:30:00           # Run time (hh:mm:ss) - 1.5 hours
+
+# Launch MPI-based executable
+
+prun ./a.out
+
+[test@sms-ohpc20-centos8 x86_64]$ sbatch job.mpi
+Submitted batch job 16
+
+[test@sms-ohpc20-centos8 x86_64]$ scontrol show job 16
+JobId=16 JobName=test
+   UserId=test(1002) GroupId=test(1002) MCS_label=N/A
+   Priority=4294901755 Nice=0 Account=(null) QOS=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Requeue=1 Restarts=0 BatchFlag=1 Reboot=0 ExitCode=0:0
+   RunTime=00:00:12 TimeLimit=01:30:00 TimeMin=N/A
+   SubmitTime=2020-10-31T05:42:14 EligibleTime=2020-10-31T05:42:14
+   AccrueTime=2020-10-31T05:42:14
+   StartTime=2020-10-31T05:42:14 EndTime=2020-10-31T05:42:26 Deadline=N/A
+   SuspendTime=None SecsPreSuspend=0 LastSchedEval=2020-10-31T05:42:14
+   Partition=x86_64 AllocNode:Sid=sms-ohpc20-centos8:204
+   ReqNodeList=(null) ExcNodeList=(null)
+   NodeList=n[1-2]
+   BatchHost=n1
+   NumNodes=2 NumCPUs=8 NumTasks=8 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   TRES=cpu=8,node=2,billing=8
+   Socks/Node=* NtasksPerN:B:S:C=0:0:*:* CoreSpec=*
+   MinCPUsNode=1 MinMemoryNode=0 MinTmpDiskNode=0
+   Features=(null) DelayBoot=00:00:00
+   OverSubscribe=OK Contiguous=0 Licenses=(null) Network=(null)
+   Command=/home/test/x86_64/job.mpi
+   WorkDir=/home/test/x86_64
+   StdErr=/home/test/x86_64/job.16.out
+   StdIn=/dev/null
+   StdOut=/home/test/x86_64/job.16.out
+   Power=
+   MailUser=(null) MailType=NONE
+
+[test@sms-ohpc20-centos8 x86_64]$ cat job.16.out
+[prun] Master compute host = n1
+[prun] Resource manager = slurm
+[prun] Launch cmd = mpirun ./a.out (family=openmpi4)
+
+ Hello, world (8 procs total)
+    --> Process #   1 of   8 is alive. -> n1
+    --> Process #   0 of   8 is alive. -> n1
+    --> Process #   2 of   8 is alive. -> n1
+    --> Process #   3 of   8 is alive. -> n1
+    --> Process #   5 of   8 is alive. -> n2
+    --> Process #   4 of   8 is alive. -> n2
+    --> Process #   7 of   8 is alive. -> n2
+    --> Process #   6 of   8 is alive. -> n2
 ```
