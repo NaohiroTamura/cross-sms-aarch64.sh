@@ -225,6 +225,11 @@ centos8.2-aarch64    354.0      aarch64    /opt/ohpc-aarch64/var/chroots/centos8
 #### 3.7.3 Register nodes for provisioning
 
 ```sh
+# Set provisioning interface as the default networking device
+[root@x86_64 /]# echo "GATEWAYDEV=${eth_provision}" > /tmp/network.$$
+[root@x86_64 /]# wwsh -y file import /tmp/network.$$ --name network
+[root@x86_64 /]# wwsh -y file set network --path /etc/sysconfig/network --mode=0644 --uid=0
+
 # Add nodes to Warewulf data store as aarch64
 [root@x86_64 /]# wwsh node new ${c_name} --arch=aarch64 --ipaddr=${c_ip} --hwaddr=${c_mac} -D ${eth_provision}
 

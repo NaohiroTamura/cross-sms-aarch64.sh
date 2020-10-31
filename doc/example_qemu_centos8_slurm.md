@@ -391,17 +391,25 @@ centos8.2-aarch64    359.3      aarch64    /opt/ohpc-aarch64/var/chroots/centos8
 #### 3.7.3 Register nodes for provisioning (aarch64)
 
 ```sh
+[root@sms-ohpc20-centos8 ~]# echo "GATEWAYDEV=eth0" > /tmp/network.$$
+
+[root@sms-ohpc20-centos8 ~]# wwsh -y file import /tmp/network.$$ --name network
+
+[root@sms-ohpc20-centos8 ~]# wwsh -y file set network --path /etc/sysconfig/network --mode=0644 --uid=0
+```
+
+```sh
 [root@sms-ohpc20-centos8 ~]# wwsh -y node new c1 --arch=aarch64 --ipaddr=10.124.196.61 --hwaddr=52:54:00:12:34:56 -D eth0
 
 [root@sms-ohpc20-centos8 ~]# wwsh -y provision set c1 --vnfs=centos8.2-aarch64 --bootstrap=4.18.0-193.19.1.el8_2.aarch64 \
---files=dynamic_hosts,passwd,group,shadow,munge.key
+--files=dynamic_hosts,passwd,group,shadow,munge.key,network
 
 [root@sms-ohpc20-centos8 ~]# wwsh -y provision set c1 --kargs="net.ifnames=0 biosdevname=0 console=ttyAMA0,115200 rd.debug"
 
 [root@sms-ohpc20-centos8 ~]# wwsh -y node new c2 --arch=aarch64 --ipaddr=10.124.196.62 --hwaddr=52:54:00:12:34:57 -D eth0
 
 [root@sms-ohpc20-centos8 ~]# wwsh -y provision set c2 --vnfs=centos8.2-aarch64 --bootstrap=4.18.0-193.19.1.el8_2.aarch64 \
---files=dynamic_hosts,passwd,group,shadow,munge.key
+--files=dynamic_hosts,passwd,group,shadow,munge.key,network
 
 [root@sms-ohpc20-centos8 ~]# wwsh -y provision set c2 --kargs="net.ifnames=0 biosdevname=0 console=ttyAMA0,115200 rd.debug"
 
@@ -445,14 +453,14 @@ centos8.2-x86_64     374.9      x86_64     /opt/ohpc/admin/images/centos8.2
 [root@sms-ohpc20-centos8 ~]# wwsh -y node new n1 --arch=x86_64 --ipaddr=10.124.196.71 --hwaddr=52:54:00:12:34:66 -D eth0
 
 [root@sms-ohpc20-centos8 ~]# wwsh -y provision set n1 --vnfs=centos8.2-x86_64 --bootstrap=4.18.0-193.19.1.el8_2.x86_64 \
---files=dynamic_hosts,passwd,group,shadow,munge.key
+--files=dynamic_hosts,passwd,group,shadow,munge.key,network
 
 [root@sms-ohpc20-centos8 ~]# wwsh -y provision set n1 --kargs="net.ifnames=0 biosdevname=0 console=ttyS0,115200 rd.debug"
 
 [root@sms-ohpc20-centos8 ~]# wwsh -y node new n2 --arch=x86_64 --ipaddr=10.124.196.72 --hwaddr=52:54:00:12:34:67 -D eth0
 
 [root@sms-ohpc20-centos8 ~]# wwsh -y provision set n2 --vnfs=centos8.2-x86_64 --bootstrap=4.18.0-193.19.1.el8_2.x86_64 \
---files=dynamic_hosts,passwd,group,shadow,munge.key
+--files=dynamic_hosts,passwd,group,shadow,munge.key,network
 
 [root@sms-ohpc20-centos8 ~]# wwsh -y provision set n2 --kargs="net.ifnames=0 biosdevname=0 console=ttyS0,115200 rd.debug"
 
