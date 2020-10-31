@@ -28,8 +28,8 @@ install aarch64 OpenHPC Development Components into
 
 SMS x86_64 requires the following softwares have been installed.
 
-* [OpenHPC 1.3.9 with Warewulf + Slurm][2], [OpenHPC 2.0 with
-  Warewulf + Slurm][3], or [OpenHPC 2.0 with Warewulf + OpenPBS)][4]
+* [OpenHPC 1.3.9 x86_64 (CentOS 7.7)][2] or [OpenHPC 2.0 x86_64
+  (CentOS 8.2, Leap 15.2)][3]
 * docker/docker-ce 1.13.1 later
 
 Type the following commands to verify the software versions:
@@ -42,16 +42,15 @@ ohpc-base-1.3.8-3.1.ohpc.1.3.8.x86_64
 Docker version 1.13.1, build cccb291/1.13.1
 ```
 
-[2]: https://github.com/openhpc/ohpc/releases/download/v1.3.9.GA/Install_guide-CentOS7-Warewulf-SLURM-1.3.9-x86_64.pdf "CentOS 7.7 x86_64 Install Guide (with Warewulf + Slurm)"
-[3]: https://github.com/openhpc/ohpc/releases/download/v2.0.GA/Install_guide-CentOS8-Warewulf-SLURM-2.0-x86_64.pdf "CentOS 8.2 x86_64 Install Guide (with Warewulf + Slurm)"
-[4]: https://github.com/openhpc/ohpc/releases/download/v2.0.GA/Install_guide-CentOS8-Warewulf-OpenPBS-2.0-x86_64.pdf "CentOS 8.2 x86_64 Install Guide (with Warewulf + OpenPBS)"
+[2]: https://github.com/openhpc/ohpc/wiki/1.3.X "Community building blocks for HPC systems (v1.3.9)"
+[3]: https://github.com/openhpc/ohpc/wiki/2.X "Community building blocks for HPC systems (2.0)"
 
-Instead of docker, podman will be supported if [NFS volume issue][5]
+Instead of docker, podman will be supported if [NFS volume issue][4]
 is fixed.
 As of Oct. 27 2020, both podman 1.6.2 on CentOS 8.2 and podman 2.0.6
 on OpenSUSE Leap 15.2 have the issue.
 
-[5]: https://github.com/containers/podman/issues/4304
+[4]: https://github.com/containers/podman/issues/4304
 
 
 ## Build and Install
