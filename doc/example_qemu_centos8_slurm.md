@@ -2,6 +2,14 @@
 
 ## 0. Preparation
 
+| Node              | IP             | MAC               |
+|-------------------|----------------|-------------------|
+|sms-ohpc20-centos8 | 10.124.196.100 | 00:16:3e:e9:f1:33 |
+|c1  (aarch64 qemu) | 10.124.196.61  | 52:54:00:12:34:56 |
+|c2  (aarch64 qemu) | 10.124.196.62  | 52:54:00:12:34:57 |
+|n1  (x86_64  qemu) | 10.124.196.71  | 52:54:00:12:34:66 |
+|n2  (x86_64  qemu) | 10.124.196.72  | 52:54:00:12:34:67 |
+
 ### 0.1 OpenSSH setup
 
 ```sh
@@ -18,7 +26,30 @@
 [root@sms-ohpc20-centos8 ~]# dnf -y install nfs-utils
 ```
 
-### 0.3 Bridge setup
+### 0.3 Docker-ce setup
+
+```sh
+[root@sms-ohpc20-centos8 ~]# dnf -y install 'dnf-command(config-manager)'
+
+[root@sms-ohpc20-centos8 ~]# dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+[root@sms-ohpc20-centos8 ~]# dnf -y install docker-ce docker-ce-cli
+
+[root@sms-ohpc20-centos8 ~]# systemctl is-enabled docker.service
+
+[root@sms-ohpc20-centos8 ~]# systemctl enable docker.service
+
+[root@sms-ohpc20-centos8 ~]# systemctl start docker.service
+
+[root@sms-ohpc20-centos8 ~]# systemctl status docker.service
+
+[root@sms-ohpc20-centos8 ~]# docker -v
+Docker version 19.03.13, build 4484c46d9d
+
+[root@sms-ohpc20-centos8 ~]# docker run -it --rm busybox
+```
+
+### 0.4 Bridge setup
 
 ```sh
 [root@sms-ohpc20-centos8 ~]# nmcli con show
@@ -48,30 +79,70 @@ eth1         97845e67-6548-4977-bd51-d625fe8973a1  ethernet  eth1
 System eth0  5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03  ethernet  --
 
 [root@sms-ohpc20-centos8 ~]# systemctl restart NetworkManager
+
+# check br0 IP address
+[root@sms-ohpc20-centos8 ~]# ip a
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host
+       valid_lft forever preferred_lft forever
+3: br0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+    link/ether 00:16:3e:e9:f1:33 brd ff:ff:ff:ff:ff:ff
+    inet 10.124.196.100/24 brd 10.124.196.255 scope global noprefixroute br0
+       valid_lft forever preferred_lft forever
+4: docker0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default
+    link/ether 02:42:e9:1f:b4:52 brd ff:ff:ff:ff:ff:ff
+    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::42:e9ff:fe1f:b452/64 scope link
+       valid_lft forever preferred_lft forever
+75: eth0@if76: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+    link/ether 00:16:3e:b6:cb:56 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    inet 10.62.192.75/24 brd 10.62.192.255 scope global dynamic eth0
+       valid_lft 3083sec preferred_lft 3083sec
+    inet6 fe80::216:3eff:feb6:cb56/64 scope link
+       valid_lft forever preferred_lft forever
+77: eth1@if78: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master br0 state UP group default qlen 1000
+    link/ether 00:16:3e:e9:f1:33 brd ff:ff:ff:ff:ff:ff link-netnsid 0
 ```
 
-### 0.4 Docker-ce setup
-
+### 0.5 OVMF
 
 ```sh
-[root@sms-ohpc20-centos8 ~]# dnf -y install 'dnf-command(config-manager)'
+[root@sms-ohpc20-centos8 ~]# yum config-manager --add-repo https://www.kraxel.org/repos/jenkins/
 
-[root@sms-ohpc20-centos8 ~]# dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+[root@sms-ohpc20-centos8 ~]# yum -y --nogpg install edk2.git-ovmf-x64 edk2.git-aarch64
 
-[root@sms-ohpc20-centos8 ~]# dnf -y install docker-ce docker-ce-cli
+[root@sms-ohpc20-centos8 ~]# yum-config-manager --disable kraxel.org_repos_jenkins_
+```
 
-[root@sms-ohpc20-centos8 ~]# systemctl is-enabled docker.service
+### QEMU 5.1.0
 
-[root@sms-ohpc20-centos8 ~]# systemctl enable docker.service
+```sh
+[root@sms-ohpc20-centos8 ~]# wget https://download.qemu.org/qemu-5.1.0.tar.xz
 
-[root@sms-ohpc20-centos8 ~]# systemctl start docker.service
+[root@sms-ohpc20-centos8 ~]# tar xvf ../qemu-5.1.0.tar.xz
 
-[root@sms-ohpc20-centos8 ~]# systemctl status docker.service
+[root@sms-ohpc20-centos8 ~]# cd qemu-5.1.0
 
-[root@sms-ohpc20-centos8 ~]# docker -v
-Docker version 19.03.13, build 4484c46d9d
+[root@sms-ohpc20-centos8 qemu-5.1.0]# yum -y groupinstall 'Development tools'
 
-[root@sms-ohpc20-centos8 ~]# docker run -it --rm busybox
+[root@sms-ohpc20-centos8 qemu-5.1.0]# yum -y install hostname python3 zlib-devel glib2-devel pixman-devel libcap-ng-devel libattr-devel
+
+# disable kvm so as to be able to run on vm guest or public cloud which doesn't allow nested vm.
+[root@sms-ohpc20-centos8 qemu-5.1.0]# ./configure --target-list=x86_64-softmmu,aarch64-softmmu --prefix=/opt/qemu-5.1.0 --disable-kvm --enable-virtfs
+
+[root@sms-ohpc20-centos8 qemu-5.1.0]# make -j4
+
+[root@sms-ohpc20-centos8 qemu-5.1.0]# make check
+
+[root@sms-ohpc20-centos8 qemu-5.1.0]# make install
+
+[root@sms-ohpc20-centos8 qemu-5.1.0]# mkdir -p /opt/qemu-5.1.0/etc/qemu
+
+[root@sms-ohpc20-centos8 qemu-5.1.0]# echo "allow br0" > /opt/qemu-5.1.0/etc/qemu/bridge.conf
 ```
 
 ----------------------------------------------------------------------
@@ -81,6 +152,9 @@ Docker version 19.03.13, build 4484c46d9d
 ```sh
 [root@sms-ohpc20-centos8 ~]# sms_ip=10.124.196.100
 
+# 'sms_name' has to be the name 'hostname' command returns.
+# slurmctrld doesn't start if 'sms_name' is an alias name defined for
+# 'sms_ip' in /etc/host.
 [root@sms-ohpc20-centos8 ~]# sms_name=sms-ohpc20-centos8
 
 [root@sms-ohpc20-centos8 ~]# ntp_server=10.134.61.180
@@ -135,43 +209,24 @@ Docker version 19.03.13, build 4484c46d9d
 
 [root@sms-ohpc20-centos8 ~]# cp /etc/slurm/slurm.conf.ohpc /etc/slurm/slurm.conf
 
+# 'sms_name' has to be the name 'hostname' command returns.
+# slurmctrld doesn't start if 'sms_name' is an alias name defined for
+# 'sms_ip' in /etc/host.
 [root@sms-ohpc20-centos8 ~]# perl -pi -e "s/ControlMachine=\S+/ControlMachine=${sms_name}/" /etc/slurm/slurm.conf
 ```
 
 ### 3.5 Optionally add InﬁniBand support services on master node (x86_64)
 
+No operation.
+
 ### 3.6 Optionally add Omni-Path support services on master node (x86_64)
+
+No operation.
 
 ### 3.7 Complete basic Warewulf setup for master node (x86_64)
 
 ```sh
 [root@sms-ohpc20-centos8 ~]# perl -pi -e "s/device = eth1/device = ${sms_eth_internal}/" /etc/warewulf/provision.conf
-
-[root@sms-ohpc20-centos8 ~]# ip a
-1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
-    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-    inet 127.0.0.1/8 scope host lo
-       valid_lft forever preferred_lft forever
-    inet6 ::1/128 scope host
-       valid_lft forever preferred_lft forever
-3: br0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
-    link/ether 00:16:3e:e9:f1:33 brd ff:ff:ff:ff:ff:ff
-    inet 10.124.196.100/24 brd 10.124.196.255 scope global noprefixroute br0
-       valid_lft forever preferred_lft forever
-4: docker0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default
-    link/ether 02:42:e9:1f:b4:52 brd ff:ff:ff:ff:ff:ff
-    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0
-       valid_lft forever preferred_lft forever
-    inet6 fe80::42:e9ff:fe1f:b452/64 scope link
-       valid_lft forever preferred_lft forever
-75: eth0@if76: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
-    link/ether 00:16:3e:b6:cb:56 brd ff:ff:ff:ff:ff:ff link-netnsid 0
-    inet 10.62.192.75/24 brd 10.62.192.255 scope global dynamic eth0
-       valid_lft 3083sec preferred_lft 3083sec
-    inet6 fe80::216:3eff:feb6:cb56/64 scope link
-       valid_lft forever preferred_lft forever
-77: eth1@if78: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master br0 state UP group default qlen 1000
-    link/ether 00:16:3e:e9:f1:33 brd ff:ff:ff:ff:ff:ff link-netnsid 0
 
 [root@sms-ohpc20-centos8 ~]# systemctl enable httpd.service
 
@@ -185,7 +240,6 @@ Docker version 19.03.13, build 4484c46d9d
 ```
 
 ### 3.8 Deﬁne compute image for provisioning (x86_64), 3.6 Deﬁne compute image for provisioning (aarch64)
-
 
 #### 3.6.1 Build initial BOS image (aarch64)
 
@@ -202,6 +256,7 @@ Docker version 19.03.13, build 4484c46d9d
 
 [root@sms-ohpc20-centos8 ~]# sms-aarch64.sh
 
+# Notice that bash prompt is changed. Now we are in the container.
 [root@aarch64 /]# export CHROOT=/var/chroots/centos8.2
 
 [root@aarch64 /]# mkdir -p $CHROOT/usr/bin
@@ -226,6 +281,8 @@ Docker version 19.03.13, build 4484c46d9d
 
 [root@aarch64 /]# chroot $CHROOT systemctl enable munge
 
+# 'sms_ip' is set again because shell variable in the container host
+# is not inherited into the container guest.
 [root@aarch64 /]# sms_ip=10.124.196.100
 
 [root@aarch64 /]# echo SLURMD_OPTIONS="--conf-server ${sms_ip}" > $CHROOT/etc/sysconfig/slurmd
@@ -238,6 +295,8 @@ Docker version 19.03.13, build 4484c46d9d
 
 [root@aarch64 /]# yum -y --installroot=$CHROOT install lmod-ohpc
 
+# glibc-headers glibc-devel are necessary to compile user's application
+# program on aarch64 Conpute Node
 [root@aarch64 /]# yum -y --installroot=$CHROOT install glibc-headers glibc-devel
 
 [root@aarch64 /]# exit
@@ -246,9 +305,14 @@ Docker version 19.03.13, build 4484c46d9d
 #### 3.6.3 Customize system conﬁguration (aarch64)
 
 ```sh
+# aarch64 BOS (Base Operating System) image in x86_64 host, which path
+# is mapped to /var/chroots/centos8.2 in sms-aarch64.sh container.
 [root@sms-ohpc20-centos8 ~]# export AARCH64_CHROOT=/opt/ohpc-aarch64/var/chroots/centos8.2
 
-[root@sms-ohpc20-centos8 ~]# cat ~/.ssh/cluster.pub >> $AARCH64_CHROOT/root/.ssh/authorized_keys
+# $AARCH64_CHROOT/root/.ssh/authorized_keys has /root/.ssh/cluster.pub
+# of sms-aarch64.sh container. So it has to be overwitten by
+# /root/.ssh/cluster.pub of x86_64 host 'sms-ohpc20-centos8'.
+[root@sms-ohpc20-centos8 ~]# cat ~/.ssh/cluster.pub > $AARCH64_CHROOT/root/.ssh/authorized_keys
 
 [root@sms-ohpc20-centos8 ~]# chmod 0600 $AARCH64_CHROOT/root/.ssh/authorized_keys
 
@@ -264,6 +328,7 @@ Docker version 19.03.13, build 4484c46d9d
 #### 3.8.1 Build initial BOS image (x86_64)
 
 ```sh
+# x86_64 BOS(Base Operating System) image
 [root@sms-ohpc20-centos8 ~]# export X86_64_CHROOT=/opt/ohpc/admin/images/centos8.2
 
 [root@sms-ohpc20-centos8 ~]# mkdir -p $X86_64_CHROOT
@@ -342,12 +407,15 @@ Docker version 19.03.13, build 4484c46d9d
 #### 3.7.1 Assemble bootstrap image (aarch64)
 
 ```sh
+# These two packages are necessary to assemble aarch64 bootstrap on
+# x86_64 host.
 [root@sms-ohpc20-centos8 ~]# yum install -y warewulf-provision-ohpc-initramfs-aarch64 warewulf-provision-ohpc-server-ipxe-aarch64
 
 [root@sms-ohpc20-centos8 ~]# export WW_CONF=/etc/warewulf/bootstrap.conf
 
 [root@sms-ohpc20-centos8 ~]# echo "drivers += updates/kernel/" >> $WW_CONF
 
+# These kernel modules are necessary to boot OS in QEMU environment
 [root@sms-ohpc20-centos8 ~]# echo "modprobe += virtio, virtio_ring, virtio_blk, virtio_net, virtio_pci" >> $WW_CONF
 ```
 
@@ -357,12 +425,15 @@ Docker version 19.03.13, build 4484c46d9d
 
 [root@sms-ohpc20-centos8 ~]# wwbootstrap --chroot $AARCH64_CHROOT 4.18.0-193.19.1.el8_2.aarch64
 
+# Notice ARCH is x86_64
 [root@sms-ohpc20-centos8 ~]# wwsh bootstrap list
 BOOTSTRAP NAME            SIZE (M)      ARCH
 4.18.0-193.19.1.el8_2.aarch64 38.7          x86_64
 
+# Change ARCH to aarch64
 [root@sms-ohpc20-centos8 ~]# wwsh bootstrap set -y -a aarch64 4.18.0-193.19.1.el8_2.aarch64
 
+# Confirm ARCH is changed to aarch64
 [root@sms-ohpc20-centos8 ~]# wwsh bootstrap list
 BOOTSTRAP NAME            SIZE (M)      ARCH
 4.18.0-193.19.1.el8_2.aarch64 38.7          aarch64
@@ -371,18 +442,25 @@ BOOTSTRAP NAME            SIZE (M)      ARCH
 #### 3.7.2 Assemble Virtual Node File System (VNFS) image (aarch64)
 
 ```sh
+# munge uid/gid is different between SMS and CN, therefor munge owned
+# directories have to be updated to SMS's munge uid/gid.
 [root@sms-ohpc20-centos8 ~]# chown -R munge.munge $AARCH64_CHROOT/etc/munge $AARCH64_CHROOT/var/lib/munge $AARCH64_CHROOT/var/log/munge $AARCH64_CHROOT/run/munge
 
+# VNFS image has to include "/usr/include" headers to compile user's
+# application program on Compute Node.
 [root@sms-ohpc20-centos8 ~]# perl -pi -e "s/^hybridize \+= \/usr\/include/\#hybridize \+= \/usr\/include/" /etc/warewulf/vnfs.conf
 
 [root@sms-ohpc20-centos8 ~]# wwvnfs --chroot $AARCH64_CHROOT centos8.2-aarch64
 
+# Notice ARCH is x86_64
 [root@sms-ohpc20-centos8 ~]# wwsh vnfs list
 VNFS NAME            SIZE (M)   ARCH       CHROOT LOCATION
 centos8.2-aarch64    359.3      x86_64     /opt/ohpc-aarch64/var/chroots/centos8.2
 
+# Change ARCH to aarch64
 [root@sms-ohpc20-centos8 ~]# wwsh vnfs set -y centos8.2-aarch64 -a aarch64
 
+# Confirm ARCH is changed to aarch64
 [root@sms-ohpc20-centos8 ~]# wwsh vnfs list
 VNFS NAME            SIZE (M)   ARCH       CHROOT LOCATION
 centos8.2-aarch64    359.3      aarch64    /opt/ohpc-aarch64/var/chroots/centos8.2
@@ -437,6 +515,8 @@ BOOTSTRAP NAME            SIZE (M)      ARCH
 #### 3.9.2 Assemble Virtual Node File System (VNFS) image (x86_64)
 
 ```sh
+# munge uid/gid is different between SMS and CN, therefor munge owned
+# directories have to be updated to SMS's munge uid/gid.
 [root@sms-ohpc20-centos8 ~]# chown -R munge.munge $X86_64_CHROOT/etc/munge $X86_64_CHROOT/var/lib/munge $X86_64_CHROOT/var/log/munge $X86_64_CHROOT/run/munge
 
 [root@sms-ohpc20-centos8 ~]# wwvnfs --chroot $X86_64_CHROOT centos8.2-x86_64
@@ -482,29 +562,19 @@ n2                  UNDEF               10.124.196.72       52:54:00:12:34:67
 #### 3.8 Boot compute nodes (aarch64)
 
 ```sh
-ubuntu@bionic:~$ ip a
-...
-3: br0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
-    link/ether fe:2a:84:8c:ca:f3 brd ff:ff:ff:ff:ff:ff
-    inet 10.124.196.156/24 brd 10.124.196.255 scope global br0
-       valid_lft forever preferred_lft forever
-    inet6 fe80::fc5f:5ff:fed2:b998/64 scope link
-       valid_lft forever preferred_lft forever
-...
-```
+[root@sms-ohpc20-centos8 ~]# cp /usr/share/edk2.git/aarch64/vars-template-pflash.raw c1-pflash.raw
+[root@sms-ohpc20-centos8 ~]# cp /usr/share/edk2.git/aarch64/vars-template-pflash.raw c2-pflash.raw
 
-```sh
-ubuntu@bionic:~$ cp /usr/share/edk2.git/aarch64/vars-template-pflash.raw c1-pflash.raw
-ubuntu@bionic:~$ cp /usr/share/edk2.git/aarch64/vars-template-pflash.raw c2-pflash.raw
-
-ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-aarch64 -m 8192 \
+# open new terminal
+[root@sms-ohpc20-centos8 ~]# /opt/qemu-5.1.0/bin/qemu-system-aarch64 -m 8192 \
 -drive if=pflash,format=raw,readonly,file=/usr/share/edk2.git/aarch64/QEMU_EFI-pflash.raw \
 -drive if=pflash,format=raw,file=c1-pflash.raw \
 -netdev bridge,id=net0,br=br0 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:56 \
 -serial mon:stdio -nographic -machine virt,accel=tcg -cpu cortex-a72 -smp 4 \
 -device virtio-rng-pci
 
-ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-aarch64 -m 8192 \
+# open new terminal
+[root@sms-ohpc20-centos8 ~]# /opt/qemu-5.1.0/bin/qemu-system-aarch64 -m 8192 \
 -drive if=pflash,format=raw,readonly,file=/usr/share/edk2.git/aarch64/QEMU_EFI-pflash.raw \
 -drive if=pflash,format=raw,file=c2-pflash.raw \
 -netdev bridge,id=net0,br=br0 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:57 \
@@ -515,17 +585,19 @@ ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-aarch64 -m 8192 \
 #### 3.10 Boot compute nodesStart (x86_64)
 
 ```sh
-ubuntu@bionic:~$ cp /usr/share/edk2.git/ovmf-x64/OVMF_VARS-pure-efi.fd n1-pure-efi.fd
-ubuntu@bionic:~$ cp /usr/share/edk2.git/ovmf-x64/OVMF_VARS-pure-efi.fd n2-pure-efi.fd
+[root@sms-ohpc20-centos8 ~]# cp /usr/share/edk2.git/ovmf-x64/OVMF_VARS-pure-efi.fd n1-pure-efi.fd
+[root@sms-ohpc20-centos8 ~]# cp /usr/share/edk2.git/ovmf-x64/OVMF_VARS-pure-efi.fd n2-pure-efi.fd
 
-ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-x86_64 -m 8192 \
+# open new terminal
+[root@sms-ohpc20-centos8 ~]# /opt/qemu-5.1.0/bin/qemu-system-x86_64 -m 8192 \
 -drive if=pflash,format=raw,readonly,file=/usr/share/edk2.git/ovmf-x64/OVMF_CODE-pure-efi.fd \
 -drive if=pflash,format=raw,file=n1-pure-efi.fd \
 -netdev bridge,id=net0,br=br0 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:66 \
 -serial mon:stdio -nographic -machine q35,accel=tcg -smp 4 \
 -device virtio-rng-pci
 
-ubuntu@bionic:~$ sudo /opt/qemu-5.0.0/bin/qemu-system-x86_64 -m 8192 \
+# open new terminal
+[root@sms-ohpc20-centos8 ~]# /opt/qemu-5.1.0/bin/qemu-system-x86_64 -m 8192 \
 -drive if=pflash,format=raw,readonly,file=/usr/share/edk2.git/ovmf-x64/OVMF_CODE-pure-efi.fd \
 -drive if=pflash,format=raw,file=n2-pure-efi.fd \
 -netdev bridge,id=net0,br=br0 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:67 \
