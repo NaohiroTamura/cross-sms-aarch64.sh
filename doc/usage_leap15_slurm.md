@@ -118,7 +118,9 @@ container.
 ```sh
 [root@x86_64 ~]# export AARCH64_CHROOT=/opt/ohpc-aarch64/var/chroots/leap15.2
 
-# copy ssh public key
+# $AARCH64_CHROOT/root/.ssh/authorized_keys has /root/.ssh/cluster.pub
+# of sms-aarch64.sh container. So it has to be overwitten by
+# /root/.ssh/cluster.pub of the host x86_64.
 [root@x86_64 ~]# cat ~/.ssh/cluster.pub >> $AARCH64_CHROOT/root/.ssh/authorized_keys
 [root@x86_64 ~]# chmod 0600 $AARCH64_CHROOT/root/.ssh/authorized_keys
 
