@@ -93,7 +93,7 @@ HTTPS_PROXY environment variables.
 - [OpenHPC 2.0 Leap 15.2 (with Warewulf + Slurm)](doc/usage_leap15_slurm.md)
 
 
-## Cross platform SMS example using QEMU
+## Cross Platform Cluster Example using QEMU
 
 - [OpenHPC 2.0 CentOS 8.2 (with Warewulf + Slurm)](doc/example_qemu_centos8_slurm.md)
 
