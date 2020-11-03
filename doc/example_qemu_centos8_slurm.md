@@ -458,7 +458,7 @@ VNFS NAME            SIZE (M)   ARCH       CHROOT LOCATION
 centos8.2-aarch64    359.3      x86_64     /opt/ohpc-aarch64/var/chroots/centos8.2
 
 # Change ARCH to aarch64
-[root@sms-ohpc20-centos8 ~]# wwsh vnfs set -y centos8.2-aarch64 -a aarch64
+[root@sms-ohpc20-centos8 ~]# wwsh vnfs set -y -a aarch64 centos8.2-aarch64
 
 # Confirm ARCH is changed to aarch64
 [root@sms-ohpc20-centos8 ~]# wwsh vnfs list

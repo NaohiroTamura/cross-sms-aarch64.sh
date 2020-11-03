@@ -216,7 +216,7 @@ VNFS NAME            SIZE (M)   ARCH       CHROOT LOCATION
 centos8.2-aarch64    354.0      x86_64     /opt/ohpc-aarch64/var/chroots/centos8.2
 
 # Update the ARCH
-[root@x86_64 ~]# wwsh vnfs set -y centos8.2-aarch64 -a aarch64
+[root@x86_64 ~]# wwsh vnfs set -y -a aarch64 centos8.2-aarch64
 
 # make sure that ARCH is updated to aarch64
 [root@x86_64 ~]# wwsh vnfs list

@@ -218,7 +218,7 @@ VNFS NAME            SIZE (M)   ARCH       CHROOT LOCATION
 leap15.2-aarch64     272.2      x86_64     /opt/ohpc-aarch64/var/chroots/leap15.2
 
 # Update the ARCH
-[root@x86_64 ~]# wwsh vnfs set -y centos7.7-aarch64 -a aarch64
+[root@x86_64 ~]# wwsh vnfs set -y -a aarch64 centos7.7-aarch64
 
 # make sure that ARCH is updated to aarch64
 [root@x86_64 ~]# wwsh vnfs list
