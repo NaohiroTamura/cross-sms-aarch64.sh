@@ -66,13 +66,10 @@ support Linux Capabilities which *iputils* package requires.
 [root@aarch64 /]# mkdir -p $CHROOT/usr/bin
 [root@aarch64 /]# cp -p /usr/bin/qemu-aarch64-static $CHROOT/usr/bin
 
-# If OHPC cluster is isolated from Internet, you need to change 
-# $YUM_MIRROR to your local repository.
-# And also need to disable the yum configuration definition installed 
-# by the OS.
+# If OHPC cluster is isolated from Internet, need to change 
+# $YUM_MIRROR to the local repository.
 [root@aarch64 /]# vi /usr/libexec/warewulf/wwmkchroot/centos-8.tmpl
 YUM_MIRROR="/repos/centos-8.2-aarch64/BaseOS", "/repos/centos-8.2-aarch64/AppStream", "/repos/centos-8.2-aarch64/PowerTools"
-[root@aarch64 /]# perl -pi -e "s/enabled=1/enabled=0/" /var/chroots/fx700/etc/yum.repos.d/CentOS-*.repo
 
 # make sure wwmkchroot is returned with no error
 [root@aarch64 /]# wwmkchroot -d centos-8 $CHROOT
@@ -82,6 +79,10 @@ Running: cleanup
 + cleanup
 + '[' -n '' ']'
 + return 0
+
+# If OHPC cluster is isolated from Internet, need to disable the 
+# yum configuration file installed by the OS.
+[root@aarch64 /]# perl -pi -e "s/enabled=1/enabled=0/" /var/chroots/fx700/etc/yum.repos.d/CentOS-*.repo
 
 [root@aarch64 /]# yum -y --installroot $CHROOT install epel-release
 [root@aarch64 /]# cp -p /etc/yum.repos.d/OpenHPC*.repo $CHROOT/etc/yum.repos.d
