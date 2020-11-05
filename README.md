@@ -181,17 +181,13 @@ And also need to change $YUM_MIRROR to the local repository.
 Corresponds to wwmkchroot written in "3.6 Define compute image for 
 provisioning" of each Usage.
 
-    ```sh
     [root@aarch64 /]# export YUM_MIRROR=""/repos/centos-<version>.<release>/BaseOS", "/repos/centos-<version>.<release>/AppStream", "/repos/centos-<version>.<release>-aarch64/PowerTools""
     [root@aarch64 /]# wwmkchroot -d centos-<version> $CHROOT
-    ```
 
     OS Yum configuration files installed with the wwmkchroot command 
     must be disabled.
 
-    ```sh
     [root@aarch64 /]# perl -pi -e "s/enabled=1/enabled=0/" $CHROOT/etc/yum.repos.d/CentOS-*.repo
-    ```
 
 ## Develeopment Information
 
