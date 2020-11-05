@@ -110,7 +110,7 @@ two environment variables, **YUM_REPOS_D** and **LOCAL_REPO**.
     ```sh
     [root@x86_64 cross-sms-aarch64.sh]# make
 
-    [root@x86_64 cross-sms-aarch64.sh]# docker save docker.io/arm64v8/centos:7 | gzip > arm64v8_centos_7.tar.gz
+    [root@x86_64 cross-sms-aarch64.sh]# docker save docker.io/arm64v8/centos:<version> | gzip > arm64v8_centos_<version>.tar.gz
 
     [root@x86_64 cross-sms-aarch64.sh]# docker save sms-aarch64.sh:latest | gzip > sms-aarch64.sh.tar.gz
 
@@ -124,7 +124,7 @@ two environment variables, **YUM_REPOS_D** and **LOCAL_REPO**.
     ```sh
     [root@x86_64 ~]# tar zxvf cross-sms-aarch64.sh.tar.gz
 
-    [root@x86_64 cross-sms-aarch64.sh]# docker load < arm64v8_centos_7.tar.gz
+    [root@x86_64 cross-sms-aarch64.sh]# docker load < arm64v8_centos_<version>.tar.gz
 
     [root@x86_64 cross-sms-aarch64.sh]# docker load < sms-aarch64.sh.tar.gz
 
@@ -177,11 +177,14 @@ two environment variables, **YUM_REPOS_D** and **LOCAL_REPO**.
     CentOS_<version>  centos-<version>.<release>  epel-<version>
     ```
 And also need to change $YUM_MIRROR to the local repository.
+
 Corresponds to wwmkchroot written in "3.6 Define compute image for 
 provisioning" of each Usage.
+
     ```sh
     [root@aarch64 /]# export YUM_MIRROR=""/repos/centos-<version>.<release>/BaseOS", "/repos/centos-<version>.<release>/AppStream", "/repos/centos-<version>.<release>-aarch64/PowerTools""
     [root@aarch64 /]# wwmkchroot -d centos-<version> $CHROOT
+    ```
 
     OS Yum configuration files installed with the wwmkchroot command 
     must be disabled.
