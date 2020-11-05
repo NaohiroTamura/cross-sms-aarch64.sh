@@ -188,6 +188,7 @@ provisioning" of each Usage.
 
     OS Yum configuration files installed with the wwmkchroot command 
     must be disabled.
+
     ```sh
     [root@aarch64 /]# perl -pi -e "s/enabled=1/enabled=0/" $CHROOT/etc/yum.repos.d/CentOS-*.repo
     ```
