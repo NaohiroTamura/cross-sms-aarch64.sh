@@ -110,7 +110,7 @@ two environment variables, **YUM_REPOS_D** and **LOCAL_REPO**.
     ```sh
     [root@x86_64 cross-sms-aarch64.sh]# make
 
-    [root@x86_64 cross-sms-aarch64.sh]# docker save docker.io/arm64v8/centos:7 | gzip > arm64v8_centos_7.tar.gz
+    [root@x86_64 cross-sms-aarch64.sh]# docker save docker.io/arm64v8/centos:<version> | gzip > arm64v8_centos_<version>.tar.gz
 
     [root@x86_64 cross-sms-aarch64.sh]# docker save sms-aarch64.sh:latest | gzip > sms-aarch64.sh.tar.gz
 
@@ -124,7 +124,7 @@ two environment variables, **YUM_REPOS_D** and **LOCAL_REPO**.
     ```sh
     [root@x86_64 ~]# tar zxvf cross-sms-aarch64.sh.tar.gz
 
-    [root@x86_64 cross-sms-aarch64.sh]# docker load < arm64v8_centos_7.tar.gz
+    [root@x86_64 cross-sms-aarch64.sh]# docker load < arm64v8_centos_<version>.tar.gz
 
     [root@x86_64 cross-sms-aarch64.sh]# docker load < sms-aarch64.sh.tar.gz
 
@@ -145,20 +145,20 @@ two environment variables, **YUM_REPOS_D** and **LOCAL_REPO**.
     [root@x86_64 ~]# export YUM_REPOS_D=/opt/ohpc-aarch64/etc/yum.repos.d
 
     [root@x86_64 ~]# ls $YUM_REPOS_D
-    centos-7.7.repo epel-7.repo OpenHPC.local.repo
+    centos-<version>.<release>.repo epel-<version>.repo OpenHPC.local.repo
 
     [root@x86_64 ~]# export LOCAL_REPO=/opt/ohpc-aarch64/repos
 
     [root@x86_64 ~]# ls $LOCAL_REPO
-    CentOS_7 centos-7.7 epel-7
+    CentOS_<version> centos-<version>.<release> epel-<version>
 
     [root@x86_64 ~]# sms-aarch64.sh
 
     [root@aarch64 /]# ls /etc/yum.repos.d
-    centos-7.7  epel-7  OpenHPC.local.repo
+    centos-<version>.<release>  epel-<version>  OpenHPC.local.repo
 
     [root@aarch64 /]# ls /repos
-    centos-7.7.repo epel-7.repo OpenHPC.local.repo
+    centos-<version>.<release>.repo epel-<version>.repo OpenHPC.local.repo
     ```
 
     * if **LOCAL_REPO** path is **NOT** in */opt/ohpc-aarch64* of the
@@ -169,13 +169,29 @@ two environment variables, **YUM_REPOS_D** and **LOCAL_REPO**.
     [root@x86_64 ~]# export LOCAL_REPO=/repos
 
     [root@x86_64 ~]# ls $LOCAL_REPO
-    CentOS_7  centos-7.7  epel-7
+    CentOS_<version>  centos-<version>.<release>  epel-<version>
 
     [root@x86_64 ~]# sms-aarch64.sh
 
     [root@aarch64 /]# ls /repos
-    CentOS_7  centos-7.7  epel-7
+    CentOS_<version>  centos-<version>.<release>  epel-<version>
     ```
+And also need to change $YUM_MIRROR to the local repository.
+
+Corresponds to wwmkchroot written in "3.6 Define compute image for 
+provisioning" of each Usage.
+
+```sh
+[root@aarch64 /]# export YUM_MIRROR=""/repos/centos-<version>.<release>/BaseOS", "/repos/centos-<version>.<release>/AppStream", "/repos/centos-<version>.<release>-aarch64/PowerTools""
+[root@aarch64 /]# wwmkchroot -d centos-<version> $CHROOT
+```
+
+OS Yum configuration files installed with the wwmkchroot command 
+must be disabled.
+
+```sh
+[root@aarch64 /]# perl -pi -e "s/enabled=1/enabled=0/" $CHROOT/etc/yum.repos.d/CentOS-*.repo
+```
 
 ## Develeopment Information
 
