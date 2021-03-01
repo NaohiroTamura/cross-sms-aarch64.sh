@@ -18,7 +18,6 @@ FROM arm64v8/centos:8.2.2004
 ADD usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
 
 RUN sed -i -e s/enabled=0/enabled=1/g /etc/yum.repos.d/CentOS-PowerTools.repo && \
-    dnf update -y && \
     dnf install -y epel-release openssh which file
 
 
