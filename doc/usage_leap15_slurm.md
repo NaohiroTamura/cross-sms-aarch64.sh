@@ -1,15 +1,15 @@
-## Usage for OpenHPC 2.0 OpenSUSE Leap 15.2 (with Warewulf + Slurm)
+## Usage for OpenHPC 2.1 OpenSUSE Leap 15.2 (with Warewulf + Slurm)
 
-Heading title hereinafter refers to the section of OpenHPC 2.0 (6
-October 2020) [OpenSUSE Leap 15.2 aarch64 Install guide with
+Heading title hereinafter refers to the section of OpenHPC 2.1 (6
+April 2021) [OpenSUSE Leap 15.2 aarch64 Install guide with
 Warewulf + Slurm][1].
 
 Please notice that the section numbers of [OpenSUSE Leap 15.2 aarch64
 Install Guide (with Warewulf + Slurm)][1] is slightly different from
 [OpenSUSE Leap 15.2 x86_64  Install Guide (with Warewulf + Slurm)][2].
 
-[1]: https://github.com/openhpc/ohpc/releases/download/v2.0.GA/Install_guide-Leap_15-Warewulf-SLURM-2.0-aarch64.pdf "OpenSUSE Leap 15.2 aarch64 Install Guide (with Warewulf + Slurm)"
-[2]: https://github.com/openhpc/ohpc/releases/download/v2.0.GA/Install_guide-Leap_15-Warewulf-SLURM-2.0-x86_64.pdf "OpenSUSE Leap 15.2 x86_64 Install Guide (with Warewulf + Slurm)"
+[1]: https://github.com/openhpc/ohpc/releases/download/v2.1.GA/Install_guide-Leap_15-Warewulf-SLURM-2.1-aarch64.pdf "OpenSUSE Leap 15.2 aarch64 Install Guide (with Warewulf + Slurm)"
+[2]: https://github.com/openhpc/ohpc/releases/download/v2.1.GA/Install_guide-Leap_15-Warewulf-SLURM-2.1-x86_64.pdf "OpenSUSE Leap 15.2 x86_64 Install Guide (with Warewulf + Slurm)"
 
 ### 3.1 Enable OpenHPC repository for local use
 
@@ -68,7 +68,7 @@ support Linux Capabilities which *iputils* package requires.
 [root@aarch64 /]# cp -p /usr/bin/qemu-aarch64-static $CHROOT/usr/bin
 
 # make sure wwmkchroot is returned with no error
-[root@aarch64 /]# wwmkchroot -d leap15.2 $CHROOT
+[root@aarch64 /]# wwmkchroot -d opensuse-15.2 $CHROOT
 ...
 + echo 'Running: cleanup'
 Running: cleanup

@@ -28,8 +28,8 @@ install aarch64 OpenHPC Development Components into
 
 SMS x86_64 requires the following softwares have been installed.
 
-* [OpenHPC 1.3.9 x86_64 (CentOS 7.7)][2] or [OpenHPC 2.0 x86_64
-  (CentOS 8.2, Leap 15.2)][3]
+* [OpenHPC 1.3.9 x86_64 (CentOS 7.7)][2] or [OpenHPC 2.1 x86_64
+  (CentOS 8.3, Leap 15.2)][3]
 * docker/docker-ce 1.13.1 later
 
 Type the following commands to verify the software versions:
@@ -43,7 +43,7 @@ Docker version 1.13.1, build cccb291/1.13.1
 ```
 
 [2]: https://github.com/openhpc/ohpc/wiki/1.3.X "Community building blocks for HPC systems (v1.3.9)"
-[3]: https://github.com/openhpc/ohpc/wiki/2.X "Community building blocks for HPC systems (2.0)"
+[3]: https://github.com/openhpc/ohpc/wiki/2.X "Community building blocks for HPC systems (2.1)"
 
 Instead of docker, podman will be supported if [NFS volume issue][4]
 is fixed.
@@ -70,8 +70,8 @@ HTTPS_PROXY environment variables.
 
 3. make depends on OS and OpenHPC version
 [root@x86_64 cross-sms-aarch64.sh]# make                  # CentOS 7.7 for OpenHPC 1.3.9
-[root@x86_64 cross-sms-aarch64.sh]# make base_os=centos8  # CentOS 8.2 for OpenHPC 2.0
-[root@x86_64 cross-sms-aarch64.sh]# make base_os=leap15   # Leap 15.2  for OpenHPC 2.0
+[root@x86_64 cross-sms-aarch64.sh]# make base_os=centos8  # CentOS 8.3 for OpenHPC 2.1
+[root@x86_64 cross-sms-aarch64.sh]# make base_os=leap15   # Leap 15.2  for OpenHPC 2.1
 
 4. install
 [root@x86_64 cross-sms-aarch64.sh]# make install sms_ip=XX.XX.XX.XX
@@ -88,9 +88,9 @@ HTTPS_PROXY environment variables.
 
 
 - [OpenHPC 1.3.9 CentOS 7.7 (with Warewulf + Slurm)](doc/usage_centos7_slurm.md)
-- [OpenHPC 2.0 CentOS 8.2 (with Warewulf + Slurm)](doc/usage_centos8_slurm.md)
-- [OpenHPC 2.0 CentOS 8.2 (with Warewulf + OpenPBS)](doc/usage_centos8_openpbs.md)
-- [OpenHPC 2.0 Leap 15.2 (with Warewulf + Slurm)](doc/usage_leap15_slurm.md)
+- [OpenHPC 2.1 CentOS 8.3 (with Warewulf + Slurm)](doc/usage_centos8_slurm.md)
+- [OpenHPC 2.1 CentOS 8.3 (with Warewulf + OpenPBS)](doc/usage_centos8_openpbs.md)
+- [OpenHPC 2.1 Leap 15.2 (with Warewulf + Slurm)](doc/usage_leap15_slurm.md)
 
 
 ## Cross Platform Cluster Example using QEMU

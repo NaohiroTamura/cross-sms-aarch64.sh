@@ -1,19 +1,19 @@
-## Usage for OpenHPC 2.0 CentOS 8.2 (with Warewulf + OpenPBS)
+## Usage for OpenHPC 2.1 CentOS 8.3 (with Warewulf + OpenPBS)
 
-Heading title hereinafter refers OpenHPC 2.0 (6 October 2020) [CentOS
-8.2 aarch64 Install guide with Warewulf + OpenPBS][1].
+Heading title hereinafter refers OpenHPC 2.1 (6 April 2021) [CentOS
+8.3 aarch64 Install guide with Warewulf + OpenPBS][1].
 
-Please notice that the section numbers of [CentOS 8.2 aarch64 Install
+Please notice that the section numbers of [CentOS 8.3 aarch64 Install
 Guide (with Warewulf + OpenPBS)][1] are slightly different from [CentOS
-8.2 x86_64 Install Guide (with Warewulf + OpenPBS)][2].
+8.3 x86_64 Install Guide (with Warewulf + OpenPBS)][2].
 
-[1]: https://github.com/openhpc/ohpc/releases/download/v2.0.GA/Install_guide-CentOS8-Warewulf-OpenPBS-2.0-aarch64.pdf "CentOS 8.2 aarch64 Install Guide (with Warewulf + OpenPBS)"
-[2]: https://github.com/openhpc/ohpc/releases/download/v2.0.GA/Install_guide-CentOS8-Warewulf-OpenPBS-2.0-x86_64.pdf "CentOS 8.2 x86_64 Install Guide (with Warewulf + OpenPBS)"
+[1]: https://github.com/openhpc/ohpc/releases/download/v2.1.GA/Install_guide-CentOS8-Warewulf-OpenPBS-2.1-aarch64.pdf "CentOS 8.3 aarch64 Install Guide (with Warewulf + OpenPBS)"
+[2]: https://github.com/openhpc/ohpc/releases/download/v2.1.GA/Install_guide-CentOS8-Warewulf-OpenPBS-2.1-x86_64.pdf "CentOS 8.3 x86_64 Install Guide (with Warewulf + OpenPBS)"
 
 ### 3.1 Enable OpenHPC repository for local use
 
 The ohpc-release package has been already installed onto CentOS
-8.2.2004 container. Please take a look at Dockerfile.centos8.
+8.3.2011 container. Please take a look at Dockerfile.centos8.
 
 ### 3.2 Installation template
 
@@ -49,9 +49,9 @@ Note that the step **"cp -p /usr/bin/qemu-aarch64-static
 $CHROOT/usr/bin"** before invoking *wwmkchroot*". This step is
 essential to build the aarch64 initial BOS Image on SMS x86_64.
 
-The environment variable *CHROOT* is set to */var/chroots/centos8.2*
+The environment variable *CHROOT* is set to */var/chroots/centos8.3*
 of the container host local file system rather than
-*/opt/ohpc/admin/images/centos8.2* on NFS volume, since NFS doesn't
+*/opt/ohpc/admin/images/centos8.3* on NFS volume, since NFS doesn't
 support Linux Capabilities which *iputils* package requires.
 
 ```sh
@@ -60,7 +60,7 @@ support Linux Capabilities which *iputils* package requires.
 [root@x86_64 ~]# sms-aarch64.sh
 
 # create the image on host file system, but not on NFS
-[root@aarch64 /]# export CHROOT=/var/chroots/centos8.2
+[root@aarch64 /]# export CHROOT=/var/chroots/centos8.3
 
 # the essential step
 [root@aarch64 /]# mkdir -p $CHROOT/usr/bin
@@ -108,16 +108,16 @@ containerized aarch64 environment is now used to create a customized
 chrooted VNFS environment in a path that is accessible by the parent
 x86_64 host.
 
-Please note that the path */var/chroots/images/centos8.2*
+Please note that the path */var/chroots/images/centos8.3*
 in the container is equivalent to the path
-*/opt/ohpc-aarch64/var/chroots/centos8.2* on SMS x86_64.
+*/opt/ohpc-aarch64/var/chroots/centos8.3* on SMS x86_64.
 
 The environment variable *AARCH64_CHROOT* is chosen to prevent us from
 mixing up *CHROOT* inside the container with *CHROOT* outside the
 container.
 
 ```sh
-[root@x86_64 ~]# export AARCH64_CHROOT=/opt/ohpc-aarch64/var/chroots/centos8.2
+[root@x86_64 ~]# export AARCH64_CHROOT=/opt/ohpc-aarch64/var/chroots/centos8.3
 
 # copy ssh public key
 [root@x86_64 ~]# cat ~/.ssh/cluster.pub >> $AARCH64_CHROOT/root/.ssh/authorized_keys
@@ -156,23 +156,23 @@ The bootstrap image created on x86_64 have *ARCH* attribute
 
 # check the kernel version of the aarch64 BOS image
 [root@x86_64 ~]# ls $AARCH64_CHROOT/boot/vmlinuz*
-/opt/ohpc-aarch64/var/chroots/centos8.2/boot/vmlinuz-4.18.0-193.19.1.el8_2.aarch64
+/opt/ohpc-aarch64/var/chroots/centos8.3/boot/vmlinuz-4.18.0-240.22.1.el8_3.aarch64
 
 # specifty the kernel version
-[root@x86_64 ~]# wwbootstrap --chroot $AARCH64_CHROOT 4.18.0-193.19.1.el8_2.aarch64
+[root@x86_64 ~]# wwbootstrap --chroot $AARCH64_CHROOT 4.18.0-240.22.1.el8_3.aarch64
 
 # Notice that ARCH is x86_64
 [root@x86_64 ~]# wwsh bootstrap list
 BOOTSTRAP NAME            SIZE (M)      ARCH
-4.18.0-193.19.1.el8_2.aarch64 38.7          x86_64
+4.18.0-240.22.1.el8_3.aarch64 38.7          x86_64
 
 # Update the ARCH
-[root@x86_64 ~]# wwsh bootstrap set -y -a aarch64 4.18.0-193.19.1.el8_2.aarch64
+[root@x86_64 ~]# wwsh bootstrap set -y -a aarch64 4.18.0-240.22.1.el8_3.aarch64
 
 # make sure that ARCH is updated to aarch64
 [root@x86_64 ~]# wwsh bootstrap list
 BOOTSTRAP NAME            SIZE (M)      ARCH
-4.18.0-193.19.1.el8_2.aarch64 38.7         aarch64
+4.18.0-240.22.1.el8_3.aarch64 38.7         aarch64
 ```
 
 #### 3.7.2 Assemble Virtual Node File System (VNFS) image
@@ -187,20 +187,20 @@ follows.
 # optional: in case of compile on Compute Node
 [root@x86_64 ~]# perl -pi -e "s/^hybridize \+= \/usr\/include/\#hybridize \+= \/usr\/include/" /etc/warewulf/vnfs.conf
 # Assemble Virtual Node File System (VNFS) image
-[root@x86_64 ~]# wwvnfs --chroot $AARCH64_CHROOT centos8.2-aarch64
+[root@x86_64 ~]# wwvnfs --chroot $AARCH64_CHROOT centos8.3-aarch64
 
 # Notice that ARCH is x86_64
 [root@x86_64 ~]# wwsh vnfs list
 VNFS NAME            SIZE (M)   ARCH       CHROOT LOCATION
-centos8.2-aarch64    354.0      x86_64     /opt/ohpc-aarch64/var/chroots/centos8.2
+centos8.3-aarch64    354.0      x86_64     /opt/ohpc-aarch64/var/chroots/centos8.3
 
 # Update the ARCH
-[root@x86_64 ~]# wwsh vnfs set -y centos8.2-aarch64 -a aarch64
+[root@x86_64 ~]# wwsh vnfs set -y centos8.3-aarch64 -a aarch64
 
 # make sure that ARCH is updated to aarch64
 [root@x86_64 ~]# wwsh vnfs list
 VNFS NAME            SIZE (M)   ARCH       CHROOT LOCATION
-centos8.2-aarch64    354.0      aarch64    /opt/ohpc-aarch64/var/chroots/centos8.2
+centos8.3-aarch64    354.0      aarch64    /opt/ohpc-aarch64/var/chroots/centos8.3
 ```
 
 #### 3.7.3 Register nodes for provisioning
@@ -215,7 +215,7 @@ centos8.2-aarch64    354.0      aarch64    /opt/ohpc-aarch64/var/chroots/centos8
 [root@x86_64 /]# wwsh provision set --postnetdown=1 "${compute_regex}"
 
 # Define provisioning image for hosts
-[root@x86_64 /]# wwsh provision set ${c_name} --vnfs=centos8.2-aarch64 --bootstrap=4.18.0-193.19.1.el8_2.aarch64 \
+[root@x86_64 /]# wwsh provision set ${c_name} --vnfs=centos8.3-aarch64 --bootstrap=4.18.0-240.22.1.el8_3.aarch64 \
 --files=dynamic_hosts,passwd,group,shadow,network
 
 # Restart dhcp / update PXE
