@@ -46,11 +46,12 @@ Docker version 1.13.1, build cccb291/1.13.1
 [3]: https://github.com/openhpc/ohpc/wiki/2.X "Community building blocks for HPC systems (2.1)"
 
 Instead of docker, podman will be supported if [NFS volume issue][4]
-is fixed.
-As of Oct. 27 2020, both podman 1.6.2 on CentOS 8.2 and podman 2.0.6
-on OpenSUSE Leap 15.2 have the issue.
+and [metacopy check issue][5] are fixed.
+As of May. 19 2021, podman 2.2.1 on both CentOS 8.3 and OpenSUSE Leap
+15.2 didn't work.
 
 [4]: https://github.com/containers/podman/issues/4304
+[5]: https://github.com/containers/podman/issues/9363
 
 
 ## Build and Install
