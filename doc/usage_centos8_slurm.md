@@ -1,14 +1,14 @@
-## Usage for OpenHPC 2.1 CentOS 8.3 (with Warewulf + Slurm)
+## Usage for OpenHPC 2.2 CentOS 8.3 (with Warewulf + Slurm)
 
-Heading title hereinafter refers OpenHPC 2.1 (6 April 2021) [CentOS
+Heading title hereinafter refers OpenHPC 2.2 (1 Jun 2021) [CentOS
 8.3 aarch64 Install guide with Warewulf + Slurm][1].
 
 Please notice that the section numbers of [CentOS 8.3 aarch64 Install
 Guide (with Warewulf + Slurm)][1] are slightly different from [CentOS
 8.3 x86_64 Install Guide (with Warewulf + Slurm)][2].
 
-[1]: https://github.com/openhpc/ohpc/releases/download/v2.1.GA/Install_guide-CentOS8-Warewulf-SLURM-2.1-aarch64.pdf "CentOS 8.3 aarch64 Install Guide (with Warewulf + Slurm)"
-[2]: https://github.com/openhpc/ohpc/releases/download/v2.1.GA/Install_guide-CentOS8-Warewulf-SLURM-2.1-x86_64.pdf "CentOS 8.3 x86_64 Install Guide (with Warewulf + Slurm)"
+[1]: https://github.com/openhpc/ohpc/releases/download/v2.2.GA/Install_guide-Centos8-Warewulf-SLURM-2.2-aarch64.pdf "CentOS 8.3 aarch64 Install Guide (with Warewulf + Slurm)"
+[2]: https://github.com/openhpc/ohpc/releases/download/v2.2.GA/Install_guide-Centos8-Warewulf-SLURM-2.2-x86_64.pdf "CentOS 8.3 x86_64 Install Guide (with Warewulf + Slurm)"
 
 ### 3.1 Enable OpenHPC repository for local use
 
@@ -65,6 +65,12 @@ support Linux Capabilities which *iputils* package requires.
 # the essential step
 [root@aarch64 /]# mkdir -p $CHROOT/usr/bin
 [root@aarch64 /]# cp -p /usr/bin/qemu-aarch64-static $CHROOT/usr/bin
+
+# set CentOS 8.3 repository
+[root@aarch64 /]# export YUM_MIRROR=\
+http://mirror.centos.org/centos-8/8.3.2011/BaseOS/aarch64/os,\
+http://mirror.centos.org/centos-8/8.3.2011/AppStream/aarch64/os,\
+http://mirror.centos.org/centos-8/8.3.2011/PowerTools/aarch64/os
 
 # make sure wwmkchroot is returned with no error
 [root@aarch64 /]# wwmkchroot -d centos-8 $CHROOT

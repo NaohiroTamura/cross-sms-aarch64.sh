@@ -17,7 +17,13 @@ FROM arm64v8/centos:8.3.2011
 
 ADD usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
 
-RUN sed -i -e s/enabled=0/enabled=1/g /etc/yum.repos.d/CentOS-Linux-PowerTools.repo && \
+# workaround: Issue #1277 Centos Stream update conflict
+# https://github.com/openhpc/ohpc/issues/1277
+RUN sed -i -e s'|^mirrorlist.*$|baseurl=http://mirror.centos.org/centos-8/8.3.2011/BaseOS/aarch64/os/|' /etc/yum.repos.d/CentOS-Linux-BaseOS.repo && \
+    sed -i -e s'|^mirrorlist.*$|baseurl=http://mirror.centos.org/centos-8/8.3.2011/AppStream/aarch64/os/|' /etc/yum.repos.d/CentOS-Linux-AppStream.repo && \
+    sed -i -e s'|^mirrorlist.*$|baseurl=http://mirror.centos.org/centos-8/8.3.2011/extras/aarch64/os/|' /etc/yum.repos.d/CentOS-Linux-Extras.repo && \
+    sed -i -e s'|^mirrorlist.*$|baseurl=http://mirror.centos.org/centos-8/8.3.2011/PowerTools/aarch64/os/|' /etc/yum.repos.d/CentOS-Linux-PowerTools.repo && \
+    sed -i -e s/enabled=0/enabled=1/g /etc/yum.repos.d/CentOS-Linux-PowerTools.repo && \
     dnf install -y epel-release openssh which file
 
 
