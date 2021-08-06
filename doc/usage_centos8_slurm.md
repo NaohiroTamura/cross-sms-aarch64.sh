@@ -1,19 +1,19 @@
-## Usage for OpenHPC 2.2 CentOS 8.3 (with Warewulf + Slurm)
+## Usage for OpenHPC 2.3 CentOS 8.4 (with Warewulf + Slurm)
 
-Heading title hereinafter refers OpenHPC 2.2 (1 Jun 2021) [CentOS
-8.3 aarch64 Install guide with Warewulf + Slurm][1].
+Heading title hereinafter refers OpenHPC 2.3 (25 Jun 2021) [CentOS
+8.4 aarch64 Install guide with Warewulf + Slurm][1].
 
-Please notice that the section numbers of [CentOS 8.3 aarch64 Install
+Please notice that the section numbers of [CentOS 8.4 aarch64 Install
 Guide (with Warewulf + Slurm)][1] are slightly different from [CentOS
-8.3 x86_64 Install Guide (with Warewulf + Slurm)][2].
+8.4 x86_64 Install Guide (with Warewulf + Slurm)][2].
 
-[1]: https://github.com/openhpc/ohpc/releases/download/v2.2.GA/Install_guide-Centos8-Warewulf-SLURM-2.2-aarch64.pdf "CentOS 8.3 aarch64 Install Guide (with Warewulf + Slurm)"
-[2]: https://github.com/openhpc/ohpc/releases/download/v2.2.GA/Install_guide-Centos8-Warewulf-SLURM-2.2-x86_64.pdf "CentOS 8.3 x86_64 Install Guide (with Warewulf + Slurm)"
+[1]: https://github.com/openhpc/ohpc/releases/download/v2.3.GA/Install_guide-Centos8-Warewulf-SLURM-2.3-aarch64.pdf "CentOS 8.4 aarch64 Install Guide (with Warewulf + Slurm)"
+[2]: https://github.com/openhpc/ohpc/releases/download/v2.3.GA/Install_guide-Centos8-Warewulf-SLURM-2.3-x86_64.pdf "CentOS 8.4 x86_64 Install Guide (with Warewulf + Slurm)"
 
 ### 3.1 Enable OpenHPC repository for local use
 
 The ohpc-release package has been already installed onto CentOS
-8.3.2011 container. Please take a look at Dockerfile.centos8.
+8.4.2105 container. Please take a look at Dockerfile.centos8.
 
 ### 3.2 Installation template
 
@@ -49,9 +49,9 @@ Note that the step **"cp -p /usr/bin/qemu-aarch64-static
 $CHROOT/usr/bin"** before invoking *wwmkchroot*". This step is
 essential to build the aarch64 initial BOS Image on SMS x86_64.
 
-The environment variable *CHROOT* is set to */var/chroots/centos8.3*
+The environment variable *CHROOT* is set to */var/chroots/centos8.4*
 of the container host local file system rather than
-*/opt/ohpc/admin/images/centos8.3* on NFS volume, since NFS doesn't
+*/opt/ohpc/admin/images/centos8.4* on NFS volume, since NFS doesn't
 support Linux Capabilities which *iputils* package requires.
 
 ```sh
@@ -60,17 +60,11 @@ support Linux Capabilities which *iputils* package requires.
 [root@x86_64 ~]# sms-aarch64.sh
 
 # create the image on host file system, but not on NFS
-[root@aarch64 /]# export CHROOT=/var/chroots/centos8.3
+[root@aarch64 /]# export CHROOT=/var/chroots/centos8.4
 
 # the essential step
 [root@aarch64 /]# mkdir -p $CHROOT/usr/bin
 [root@aarch64 /]# cp -p /usr/bin/qemu-aarch64-static $CHROOT/usr/bin
-
-# set CentOS 8.3 repository
-[root@aarch64 /]# export YUM_MIRROR=\
-http://mirror.centos.org/centos-8/8.3.2011/BaseOS/aarch64/os,\
-http://mirror.centos.org/centos-8/8.3.2011/AppStream/aarch64/os,\
-http://mirror.centos.org/centos-8/8.3.2011/PowerTools/aarch64/os
 
 # make sure wwmkchroot is returned with no error
 [root@aarch64 /]# wwmkchroot -d centos-8 $CHROOT
@@ -110,16 +104,16 @@ containerized aarch64 environment is now used to create a customized
 chrooted VNFS environment in a path that is accessible by the parent
 x86_64 host.
 
-Please note that the path */var/chroots/images/centos8.3*
+Please note that the path */var/chroots/images/centos8.4*
 in the container is equivalent to the path
-*/opt/ohpc-aarch64/var/chroots/centos8.3* on SMS x86_64.
+*/opt/ohpc-aarch64/var/chroots/centos8.4* on SMS x86_64.
 
 The environment variable *AARCH64_CHROOT* is chosen to prevent us from
 mixing up *CHROOT* inside the container with *CHROOT* outside the
 container.
 
 ```sh
-[root@x86_64 ~]# export AARCH64_CHROOT=/opt/ohpc-aarch64/var/chroots/centos8.3
+[root@x86_64 ~]# export AARCH64_CHROOT=/opt/ohpc-aarch64/var/chroots/centos8.4
 
 # $AARCH64_CHROOT/root/.ssh/authorized_keys has /root/.ssh/cluster.pub
 # of sms-aarch64.sh container. So it has to be overwitten by
@@ -160,23 +154,23 @@ The bootstrap image created on x86_64 have *ARCH* attribute
 
 # check the kernel version of the aarch64 BOS image
 [root@x86_64 ~]# ls $AARCH64_CHROOT/boot/vmlinuz*
-/opt/ohpc-aarch64/var/chroots/centos8.3/boot/vmlinuz-4.18.0-240.22.1.el8_3.aarch64
+/opt/ohpc-aarch64/var/chroots/centos8.4/boot/vmlinuz-4.18.0-305.10.2.el8_4.aarch64
 
 # specifty the kernel version
-[root@x86_64 ~]# wwbootstrap --chroot $AARCH64_CHROOT 4.18.0-240.22.1.el8_3.aarch64
+[root@x86_64 ~]# wwbootstrap --chroot $AARCH64_CHROOT 4.18.0-305.10.2.el8_4.aarch64
 
 # Notice that ARCH is x86_64
 [root@x86_64 ~]# wwsh bootstrap list
 BOOTSTRAP NAME            SIZE (M)      ARCH
-4.18.0-240.22.1.el8_3.aarch64 38.7          x86_64
+4.18.0-305.10.2.el8_4.aarch64 41.2          x86_64
 
 # Update the ARCH
-[root@x86_64 ~]# wwsh bootstrap set -y -a aarch64 4.18.0-240.22.1.el8_3.aarch64
+[root@x86_64 ~]# wwsh bootstrap set -y -a aarch64 4.18.0-305.10.2.el8_4.aarch64
 
 # make sure that ARCH is updated to aarch64
 [root@x86_64 ~]# wwsh bootstrap list
 BOOTSTRAP NAME            SIZE (M)      ARCH
-4.18.0-240.22.1.el8_3.aarch64 38.7         aarch64
+4.18.0-305.10.2.el8_4.aarch64 41.2          aarch64
 ```
 
 #### 3.7.2 Assemble Virtual Node File System (VNFS) image
@@ -188,20 +182,20 @@ different between sms and compute node.
 ```sh
 # check munge directory uid/gid
 [root@x86_64 ~]# ls -ld $AARCH64_CHROOT/etc/munge $AARCH64_CHROOT/var/lib/munge $AARCH64_CHROOT/var/log/munge $AARCH64_CHROOT/run/munge
-drwx------ 1 unbound unbound 0 Oct 30 08:08 /opt/ohpc-aarch64/var/chroots/centos8.3/etc/munge
-drwxr-xr-x 1 unbound unbound 0 May 14  2019 /opt/ohpc-aarch64/var/chroots/centos8.3/run/munge
-drwx------ 1 unbound unbound 0 May 14  2019 /opt/ohpc-aarch64/var/chroots/centos8.3/var/lib/munge
-drwx------ 1 unbound unbound 0 May 14  2019 /opt/ohpc-aarch64/var/chroots/centos8.3/var/log/munge
+drwx------ 1 unbound unbound 0 May 19  2020 /opt/ohpc-aarch64/var/chroots/centos8.4/etc/munge
+drwxr-xr-x 1 unbound unbound 0 May 19  2020 /opt/ohpc-aarch64/var/chroots/centos8.4/run/munge
+drwx------ 1 unbound unbound 0 May 19  2020 /opt/ohpc-aarch64/var/chroots/centos8.4/var/lib/munge
+drwx------ 1 unbound unbound 0 May 19  2020 /opt/ohpc-aarch64/var/chroots/centos8.4/var/log/munge
 
 # change munge directories' uid/gid
 [root@x86_64 ~]# chown -R munge.munge $AARCH64_CHROOT/etc/munge $AARCH64_CHROOT/var/lib/munge $AARCH64_CHROOT/var/log/munge $AARCH64_CHROOT/run/munge
 
 # confirm directory uid/gid
 [root@x86_64 ~]# ls -ld $AARCH64_CHROOT/etc/munge $AARCH64_CHROOT/var/lib/munge $AARCH64_CHROOT/var/log/munge $AARCH64_CHROOT/run/munge
-drwx------ 1 munge munge 0 Oct 30 08:08 /opt/ohpc-aarch64/var/chroots/centos8.3/etc/munge
-drwxr-xr-x 1 munge munge 0 May 14  2019 /opt/ohpc-aarch64/var/chroots/centos8.3/run/munge
-drwx------ 1 munge munge 0 May 14  2019 /opt/ohpc-aarch64/var/chroots/centos8.3/var/lib/munge
-drwx------ 1 munge munge 0 May 14  2019 /opt/ohpc-aarch64/var/chroots/centos8.3/var/log/munge
+drwx------ 1 munge munge 0 May 19  2020 /opt/ohpc-aarch64/var/chroots/centos8.4/etc/munge
+drwxr-xr-x 1 munge munge 0 May 19  2020 /opt/ohpc-aarch64/var/chroots/centos8.4/run/munge
+drwx------ 1 munge munge 0 May 19  2020 /opt/ohpc-aarch64/var/chroots/centos8.4/var/lib/munge
+drwx------ 1 munge munge 0 May 19  2020 /opt/ohpc-aarch64/var/chroots/centos8.4/var/log/munge
 ```
 
 The Virtual Node File System (VNFS) image created on x86_64 have
@@ -214,20 +208,20 @@ follows.
 [root@x86_64 ~]# perl -pi -e "s/^hybridize \+= \/usr\/include/\#hybridize \+= \/usr\/include/" /etc/warewulf/vnfs.conf
 
 # Assemble Virtual Node File System (VNFS) image
-[root@x86_64 ~]# wwvnfs --chroot $AARCH64_CHROOT centos8.3-aarch64
+[root@x86_64 ~]# wwvnfs --chroot $AARCH64_CHROOT centos8.4-aarch64
 
 # Notice that ARCH is x86_64
 [root@x86_64 ~]# wwsh vnfs list
 VNFS NAME            SIZE (M)   ARCH       CHROOT LOCATION
-centos8.3-aarch64    354.0      x86_64     /opt/ohpc-aarch64/var/chroots/centos8.3
+centos8.4-aarch64    429.6      x86_64     /opt/ohpc-aarch64/var/chroots/centos8.4
 
 # Update the ARCH
-[root@x86_64 ~]# wwsh vnfs set -y -a aarch64 centos8.3-aarch64
+[root@x86_64 ~]# wwsh vnfs set -y -a aarch64 centos8.4-aarch64
 
 # make sure that ARCH is updated to aarch64
 [root@x86_64 ~]# wwsh vnfs list
 VNFS NAME            SIZE (M)   ARCH       CHROOT LOCATION
-centos8.3-aarch64    354.0      aarch64    /opt/ohpc-aarch64/var/chroots/centos8.3
+centos8.4-aarch64    429.6      aarch64    /opt/ohpc-aarch64/var/chroots/centos8.4
 ```
 
 #### 3.7.3 Register nodes for provisioning
@@ -242,7 +236,7 @@ centos8.3-aarch64    354.0      aarch64    /opt/ohpc-aarch64/var/chroots/centos8
 [root@x86_64 /]# wwsh node new ${c_name} --arch=aarch64 --ipaddr=${c_ip} --hwaddr=${c_mac} -D ${eth_provision}
 
 # Define provisioning image for hosts
-[root@x86_64 /]# wwsh provision set "${compute_regex}" --vnfs=centos8.3-aarch64 --bootstrap=4.18.0-240.22.1.el8_3.aarch64 \
+[root@x86_64 /]# wwsh provision set "${compute_regex}" --vnfs=centos8.4-aarch64 --bootstrap=4.18.0-305.10.2.el8_4.aarch64 \
 --files=dynamic_hosts,passwd,group,shadow,munge.key,network
 
 # Define provisioning image for hosts

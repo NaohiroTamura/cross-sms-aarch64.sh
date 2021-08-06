@@ -1,6 +1,6 @@
-## Usage for OpenHPC 2.2 OpenSUSE Leap 15.2 (with Warewulf + Slurm)
+## Usage for OpenHPC 2.3 OpenSUSE Leap 15.2 (with Warewulf + Slurm)
 
-Heading title hereinafter refers to the section of OpenHPC 2.2 (1
+Heading title hereinafter refers to the section of OpenHPC 2.3 (25
 Jun 2021) [OpenSUSE Leap 15.2 aarch64 Install guide with
 Warewulf + Slurm][1].
 
@@ -8,8 +8,8 @@ Please notice that the section numbers of [OpenSUSE Leap 15.2 aarch64
 Install Guide (with Warewulf + Slurm)][1] is slightly different from
 [OpenSUSE Leap 15.2 x86_64  Install Guide (with Warewulf + Slurm)][2].
 
-[1]: https://github.com/openhpc/ohpc/releases/download/v2.2.GA/Install_guide-Leap_15-Warewulf-SLURM-2.2-aarch64.pdf "OpenSUSE Leap 15.2 aarch64 Install Guide (with Warewulf + Slurm)"
-[2]: https://github.com/openhpc/ohpc/releases/download/v2.2.GA/Install_guide-Leap_15-Warewulf-SLURM-2.2-x86_64.pdf "OpenSUSE Leap 15.2 x86_64 Install Guide (with Warewulf + Slurm)"
+[1]: https://github.com/openhpc/ohpc/releases/download/v2.3.GA/Install_guide-Leap_15-Warewulf-SLURM-2.3-aarch64.pdf "OpenSUSE Leap 15.2 aarch64 Install Guide (with Warewulf + Slurm)"
+[2]: https://github.com/openhpc/ohpc/releases/download/v2.3.GA/Install_guide-Leap_15-Warewulf-SLURM-2.3-x86_64.pdf "OpenSUSE Leap 15.2 x86_64 Install Guide (with Warewulf + Slurm)"
 
 ### 3.1 Enable OpenHPC repository for local use
 
